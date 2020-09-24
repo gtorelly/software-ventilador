@@ -59,13 +59,10 @@ class flowmeter():
         
     def calc_flow(self, time_window):
         # Sums how many times in the last "window" seconds the signal changed
-        pulses = sum(self.edge_timing > time.time() - time_window)
-        flow = 60 * pulses / (self.pulses_per_liter * time_window)  # In liters per minute
-        return flow
+        pulses = np.sum(self.edge_timing > time.time() - time_window)
+        return 60 * pulses / (self.pulses_per_liter * time_window)  # In liters per minute
         
     def calc_volume(self, time_window):
         # Sums how many times in the last "window" seconds the signal changed
-        pulses = sum(self.edge_timing > time.time() - time_window)
-        volume = pulses / self.pulses_per_liter # In liters
-        return volume
-        
+        pulses = np.sum(self.edge_timing > time.time() - time_window)
+        return pulses / self.pulses_per_liter # In liters
