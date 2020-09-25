@@ -1832,6 +1832,12 @@
               <height>50</height>
              </size>
             </property>
+            <property name="sizeIncrement">
+             <size>
+              <width>100</width>
+              <height>60</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <pointsize>20</pointsize>
