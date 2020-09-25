@@ -59,7 +59,7 @@ class ReadSensors(QtCore.QObject):
 class ControlPiston(QtCore.QObject):
     signal_piston = QtCore.pyqtSignal(bool)
     
-    def __init__(self, piston, gui):
+    def __init__(self, piston, gui, mode):
         super().__init__()
         # receives the piston instance from the call of this worker in the main window
         # assigns the instance to another with the same name.
@@ -73,8 +73,8 @@ class ControlPiston(QtCore.QObject):
         # Starts going down
         self.pst_dir = 0
 
-        self.start_up()
-        self.controller()
+        # self.start_up()
+        # self.controller()
 
     def start_up(self):
         """
@@ -94,6 +94,7 @@ class ControlPiston(QtCore.QObject):
             if start_up_cycles > limit:
                 print("There is a problem at startup, check compressed air")
         print(f"start_up_cycles: {start_up_cycles}")
+        self.controller()
 
     def controller(self):
         """
@@ -561,7 +562,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.thread_sensors.start()
         
         # Piston control thread
-        self.worker_piston = ControlPiston(self.piston, gui_items)
+        self.worker_piston = ControlPiston(self.piston, gui_items, mode=0)
         self.thread_piston = QtCore.QThread()
         self.worker_piston.moveToThread(self.thread_piston)
 
@@ -570,7 +571,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.worker_piston.flw_data = self.flw_data
         self.worker_piston.vol_data = self.vol_data
         self.worker_piston.prs_data = self.prs_data
-        self.worker_piston.mode = self.mode
+        # self.worker_piston.mode = self.mode
 
         # Connecting the interface buttons to the functions inside the separate threads
         self.piston_raise_btn.clicked.connect(self.worker_piston.piston_raise)
@@ -579,6 +580,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.mode_VCV_btn.clicked.connect(self.worker_piston.mode_VCV)
         self.mode_PCV_btn.clicked.connect(self.worker_piston.mode_PCV)
         self.mode_PSV_btn.clicked.connect(self.worker_piston.mode_PSV)
+        self.start_up_btn.clicked.connect(self.worker_piston.start_up)
         self.piston_auto_btn.clicked.connect(self.worker_piston.piston_auto)
         self.thread_piston.start()
         
