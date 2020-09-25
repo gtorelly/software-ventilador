@@ -134,6 +134,11 @@ class ControlPiston(QtCore.QObject):
             idxs_last_cycle = np.where(time.time() - self.flw_data[0, :] < last_cycle_dur)[0]
 
             if self.mode == 1: # 'VCV'
+                """
+                This mode should press the ambu until the desired volume is reached. The maximum
+                flow limits how fast the volume is pumped. The frequency defines the period between
+                two breaths.
+                """
                 # Reading the relevant values from the interface
                 tgt_per = 60. / self.gui["VCV_frequency_dSpinBox"].value()
                 max_flw = self.gui["VCV_flow_dSpinBox"].value()
@@ -144,7 +149,7 @@ class ControlPiston(QtCore.QObject):
                     t_move_down = tgt_per / 4.
                     first_cycle = False
                     # Defines how long each cycle takes, enabling the volume control
-                    t_move_up = target_per - t_move_down
+                    t_move_up = tgt_per - t_move_down
                     break
 
                 # Calculate the peak volume and flow for the last cycle
@@ -156,30 +161,82 @@ class ControlPiston(QtCore.QObject):
                 if peak_flw > max_flw:
                     print("Flow is too high, close valve")
                     
-                if peak_vol > target_vol * (1.0 + margin):
-                    t_move_down = t_move_down * target_vol / peak_vol
+                if peak_vol > tgt_vol * (1.0 + margin):
+                    t_move_down = t_move_down * tgt_vol / peak_vol
                     print(f"Volume is too high, reducing t_move_down to {t_move_down:.2f}")
-                if peak_vol < target_vol * (1.0 - margin):
-                    new_t_move_down = t_move_down * target_vol / peak_vol
-                    if new_t_move_down > target_per * 0.5:
-                        t_move_down = target_per * 0.5
+                if peak_vol < tgt_vol * (1.0 - margin):
+                    new_t_move_down = t_move_down * tgt_vol / peak_vol
+                    if new_t_move_down > tgt_per * 0.5:
+                        t_move_down = tgt_per * 0.5
                         print(f"t_move_down is too long, limited at 50% cycle: {t_move_down:.2f}")
                         
                     else:
-                        t_move_down = new_down_duration
+                        t_move_down = new_t_move_down
                         print(f"Volume is too low, increasing t_move_down to {t_move_down:.2f}")
 
                 # Defines how long each cycle takes, enabling the volume control
-                t_move_up = target_per - t_move_down
+                t_move_up = tgt_per - t_move_down
                 t_wait_up = 0
                 t_wait_down = 0
-                print('VCV')
 
             elif self.mode == 2:  # 'PCV'
-                print('PCV')
+                """
+                This mode should press the ambu until the desired pressure is reached. The maximum 
+                flow limits how fast the volume is pumped. The frequency defines the period between 
+                two breaths.
+                """
+                # The target period (in secs) has to be calculated as a function of the frequency 
+                # (in rpm)
+                tgt_per = 60. / self.gui["PCV_frequency_dSpinBox"].value()
+                # Reading the relevant values from the interface
+                tgt_prs = self.gui["PCV_pressure_dSpinBox"].value()
+                t_move_down = self.gui["PCV_rise_time_dSpinBox"].value()
+                t_wait_down = self.gui["PCV_inhale_time_dSpinBox"].value()
+            
+                # Defines how long each cycle takes. This is the main method of controlling the cycle in 
+                # this mode.
+                t_move_up = tgt_per - t_move_down - t_wait_down
+                    
+                # Calculate the peak pressure during the last cycle
+                peak_prs = np.max(self.prs_data[1, idxs_last_cycle])
+                if peak_prs > tgt_prs * (1 + margin):
+                    print(f"Peak pressure {peak_prs:.1f} cmH2O is too high, close valve")
+                elif peak_prs < tgt_prs * (1 - margin):
+                    print(f"Peak pressure {peak_prs:.1f} cmH2O is too low, open valve")
+                else:
+                    print(f"Peak pressure is within 10% of {tgt_prs:.1f}: {peak_prs:.1f} cmH2O")
 
             elif self.mode == 3:  # 'PSV'
-                print('PSV')
+                """
+                This mode must detect a negative pressure (patient is inhale by itself) and start a 
+                cycle with the pressure limited 
+                """
+                tgt_prs = self.gui["PSV_support_pressure_dSpinBox"].value()
+                t_move_down = self.gui["PSV_rise_time_dSpinBox"].value() 
+                t_move_up = t_move_down
+
+                # Calculate the peak pressure during the last cycle
+                # TODO If idxs_last_cycle is None, the function fails
+                peak_prs = np.max(self.prs_data[1, idxs_last_cycle])
+                if peak_prs > tgt_prs * (1 + margin):
+                    print(f"Peak pressure {peak_prs:.1f} cmH2O is too high, close valve")
+                elif peak_prs < tgt_prs * (1 - margin):
+                    print(f"Peak pressure {peak_prs:.1f} cmH2O is too low, open valve")
+                else:
+                    print(f"Peak pressure is within 10% of {target_prs:.1f}: {peak_prs:.1f} cmH2O")
+
+                sens_range = 0.1
+                ids_prs = np.where(time.time() - self.prs_data[0, :] < sens_range)[0]
+                prs_trigger = np.mean(self.prs_data[1, ids_prs])
+                # If the piston went down, now it needs to go up
+                if self.pst_dir == 0:
+                    self.pst_dir = 1
+                # if it did not go down, but triggers the low pressure, then go down
+                elif prs_trigger < np.percentile(self.prs_data[1, :], 10):
+                    self.pst_dir = 0
+                else:
+                    # do nothing
+                    self.pst_dir = 2
 
             elif self.mode == 4:  # 'Manual Auto'
                 print('Manual')
@@ -193,7 +250,7 @@ class ControlPiston(QtCore.QObject):
             # After the configuration of the cycle times, perform the movement
             if self.mode in [1, 2, 3, 4]:
                 move_start = time.time()
-                if piston_direction == 0:
+                if self.pst_dir == 0:  # Should move down
                     # the movement will last a maximum of "t_move_down"
                     self.piston.piston_down(t_move_down)
                     # Waits until t_move_down is completed, in case the piston descended faster
@@ -204,10 +261,10 @@ class ControlPiston(QtCore.QObject):
                     if t_wait_down > 0:
                         time.sleep(t_wait_down)
                     # t_end_move_down = time.time()
-                    piston_direction = 1
+                    self.pst_dir = 1
                     down_cycle_end = time.time()
                 
-                else:
+                elif self.pst_dir == 1:  # Should move up
                     self.piston.piston_up(t_move_up)
                     move_up_dur = time.time() - move_start
                     # If this movement was faster than the expected duration, wait
@@ -216,8 +273,11 @@ class ControlPiston(QtCore.QObject):
                     # if the piston needs to wait in the up position
                     if t_wait_up > 0:
                         time.sleep(t_wait_up)
-                    piston_direction = 0
+                    self.pst_dir = 0
                     up_cycle_end = time.time()
+
+                else:  # Should do nothing
+                    continue
 
         
     def piston_lower(self):
@@ -577,10 +637,10 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.piston_raise_btn.clicked.connect(self.worker_piston.piston_raise)
         self.piston_lower_btn.clicked.connect(self.worker_piston.piston_lower)
         self.piston_auto_btn.clicked.connect(self.worker_piston.piston_auto)
-        self.mode_VCV_btn.clicked.connect(self.worker_piston.mode_VCV)
-        self.mode_PCV_btn.clicked.connect(self.worker_piston.mode_PCV)
-        self.mode_PSV_btn.clicked.connect(self.worker_piston.mode_PSV)
-        self.start_up_btn.clicked.connect(self.worker_piston.start_up)
+        # self.mode_VCV_btn.clicked.connect(self.worker_piston.mode_VCV)
+        # self.mode_PCV_btn.clicked.connect(self.worker_piston.mode_PCV)
+        # self.mode_PSV_btn.clicked.connect(self.worker_piston.mode_PSV)
+        self.startup_btn.clicked.connect(self.worker_piston.start_up)
         self.piston_auto_btn.clicked.connect(self.worker_piston.piston_auto)
         self.thread_piston.start()
         
