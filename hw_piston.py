@@ -35,7 +35,7 @@ class pneumatic_piston():
         """
         if GPIO.input(self.pin_sensor_down) == True:
             # The piston is already at the lowest position.
-            return True
+            return 'bottom'
         GPIO.output(self.pin_down, 1)
         # The timeout must be an int in ms
         ms_duration = int(round(1000 * duration, 0))
@@ -47,9 +47,9 @@ class pneumatic_piston():
         GPIO.output(self.pin_down, 0)
         # return depending on the case
         if down is None:  # Timeout occurred
-            return False
-        else:  # Didn't timeout, piston went down normally
-            return True
+            return None
+        # Didn't timeout, piston went down normally
+        return 'bottom'
         
     def piston_up(self, duration):
         """
@@ -61,7 +61,7 @@ class pneumatic_piston():
         """
         if GPIO.input(self.pin_sensor_up) == True:
             # The piston is already at the highest position.
-            return True
+            return 'top'
         GPIO.output(self.pin_up, 1)  # Makes the piston go up
         # The timeout must be an int in ms
         ms_duration = int(round(1000 * duration, 0))
@@ -71,9 +71,8 @@ class pneumatic_piston():
         up = GPIO.wait_for_edge(self.pin_sensor_up, GPIO.RISING, timeout=ms_duration)
         GPIO.output(self.pin_up, 0) 
         if up is None: # Timeout occurred
-            return False
-        else:
-            return True
+            return None
+        return 'top'
          
     def piston_up_no_stop(self, timeout):
         # Turn on the up output

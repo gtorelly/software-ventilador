@@ -49,11 +49,11 @@ class ReadSensors(QtCore.QObject):
             pressure = self.gauge.read_pressure()
             # pressure_time = time.time()
             # print(f"Runtime - read_pressure: {pressure_time - volume_time:.4f} s")
-            self.signal_sensors.emit([flow, volume, pressure])
             runtime = time.time() - start
             # print(f"Runtime - total: {runtime:.4f} s")
             if runtime < UI_UPDATE_PERIOD:
                 time.sleep(UI_UPDATE_PERIOD - runtime)
+            self.signal_sensors.emit([flow, volume, pressure])
 
             
 class ControlPiston(QtCore.QObject):
@@ -66,6 +66,158 @@ class ControlPiston(QtCore.QObject):
         self.piston = piston
         self.stop = False
         self.gui = gui
+        self.mode = 0
+
+        # Variables to store the current position and next direction of the piston movement
+        self.pst_pos = None
+        # Starts going down
+        self.pst_dir = 0
+
+        self.start_up()
+        self.controller()
+
+    def start_up(self):
+        """
+        Starts the cycle until the piston moves to a known position
+        """
+        to = 3  # Timeout
+        start_up_cycles = 0
+        limit = 20
+        while self.pst_pos == None:
+            if self.pst_dir == 1:
+                self.pst_pos = self.piston.piston_up(to)
+                self.pst_dir = 0
+            else:
+                self.pst_pos = self.piston.piston_down(to)
+                self.pst_dir = 1
+            start_up_cycles += 1
+            if start_up_cycles > limit:
+                print("There is a problem at startup, check compressed air")
+        print(f"start_up_cycles: {start_up_cycles}")
+
+    def controller(self):
+        """
+        This function intends to replace all the separate functions that were developed to control
+        the pneumatic piston. By controlling the behavior of the piston at each step, a better
+        integration between the modes and the information that is shown on the screen may be
+        achieved.
+        When I started to write this function, there was no unified way to determine the stats on
+        the last cycle or to synchronize the data shown on the interface between modes.
+        A lot of the code was repeated between modes. By aggregating everything in one function I
+        hope to reduce the length of the code and keep this thread running with piston actions
+        based on the interface in a simpler way.
+        """
+        t_wait_up = 0
+        t_wait_down = 0
+        first_cycle = True
+        # Initializing the timers
+        up_cycle_start = time.time()
+        down_cycle_start = time.time()
+        up_cycle_end = time.time()
+        down_cycle_end = time.time()
+
+        # 5% margin of error for the target values
+        margin = 0.05
+
+        # Starts the automatic loop
+        while True:
+            # Stores the time at the beginning of a cycle or semi-cycle
+            if self.pst_dir == 1:
+                up_cycle_start = time.time()
+            else:
+                down_cycle_start = time.time()
+            last_cycle_dur = up_cycle_end - down_cycle_start
+
+            # Uses flow for the calculation of the indexes, but flow, volume and pressure are
+            # stored simultaneously, so it shouldn't make a difference
+            idxs_last_cycle = np.where(time.time() - self.flw_data[0, :] < last_cycle_dur)[0]
+
+            if self.mode == 1: # 'VCV'
+                # Reading the relevant values from the interface
+                tgt_per = 60. / self.gui["VCV_frequency_dSpinBox"].value()
+                max_flw = self.gui["VCV_flow_dSpinBox"].value()
+                tgt_vol = self.gui["VCV_volume_dSpinBox"].value()
+
+                # On the first cycle, use standard values
+                if first_cycle:
+                    t_move_down = tgt_per / 4.
+                    first_cycle = False
+                    # Defines how long each cycle takes, enabling the volume control
+                    t_move_up = target_per - t_move_down
+                    break
+
+                # Calculate the peak volume and flow for the last cycle
+                peak_flw = np.max(self.flw_data[1, idxs_last_cycle])
+                print(f"Peak flow: {peak_flw:.1f}")
+                peak_vol = np.max(self.vol_data[1, idxs_last_cycle])
+                print(f"Peak volume: {peak_vol:.1f}")
+
+                if peak_flw > max_flw:
+                    print("Flow is too high, close valve")
+                    
+                if peak_vol > target_vol * (1.0 + margin):
+                    t_move_down = t_move_down * target_vol / peak_vol
+                    print(f"Volume is too high, reducing t_move_down to {t_move_down:.2f}")
+                if peak_vol < target_vol * (1.0 - margin):
+                    new_t_move_down = t_move_down * target_vol / peak_vol
+                    if new_t_move_down > target_per * 0.5:
+                        t_move_down = target_per * 0.5
+                        print(f"t_move_down is too long, limited at 50% cycle: {t_move_down:.2f}")
+                        
+                    else:
+                        t_move_down = new_down_duration
+                        print(f"Volume is too low, increasing t_move_down to {t_move_down:.2f}")
+
+                # Defines how long each cycle takes, enabling the volume control
+                t_move_up = target_per - t_move_down
+                t_wait_up = 0
+                t_wait_down = 0
+                print('VCV')
+
+            elif self.mode == 2:  # 'PCV'
+                print('PCV')
+
+            elif self.mode == 3:  # 'PSV'
+                print('PSV')
+
+            elif self.mode == 4:  # 'Manual Auto'
+                print('Manual')
+
+            else:  # STOP
+                print('STOP')
+                # Does not perform the movements below, just waits and continues to the next cycle
+                time.sleep(0.5)
+                continue
+
+            # After the configuration of the cycle times, perform the movement
+            if self.mode in [1, 2, 3, 4]:
+                move_start = time.time()
+                if piston_direction == 0:
+                    # the movement will last a maximum of "t_move_down"
+                    self.piston.piston_down(t_move_down)
+                    # Waits until t_move_down is completed, in case the piston descended faster
+                    move_down_dur = time.time() - move_start
+                    if move_down_dur < t_move_down:
+                        time.sleep(t_move_down - move_down_dur)
+                    # if the piston needs to wait in the down position
+                    if t_wait_down > 0:
+                        time.sleep(t_wait_down)
+                    # t_end_move_down = time.time()
+                    piston_direction = 1
+                    down_cycle_end = time.time()
+                
+                else:
+                    self.piston.piston_up(t_move_up)
+                    move_up_dur = time.time() - move_start
+                    # If this movement was faster than the expected duration, wait
+                    if move_up_dur < t_move_up:
+                        time.sleep(t_move_up - move_up_dur)
+                    # if the piston needs to wait in the up position
+                    if t_wait_up > 0:
+                        time.sleep(t_wait_up)
+                    piston_direction = 0
+                    up_cycle_end = time.time()
+
         
     def piston_lower(self):
         """
@@ -361,8 +513,8 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.mode_VCV_btn.clicked.connect(lambda: self.modes(1))
         self.mode_PCV_btn.clicked.connect(lambda: self.modes(2))
         self.mode_PSV_btn.clicked.connect(lambda: self.modes(3))
-        self.mode_STOP_btn.clicked.connect(lambda: self.modes(0))
         self.piston_auto_btn.clicked.connect(lambda: self.modes(4))
+        self.mode_STOP_btn.clicked.connect(lambda: self.modes(0))
 
         # Configuration of the default values on the interface
         self.start_interface()
@@ -418,6 +570,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.worker_piston.flw_data = self.flw_data
         self.worker_piston.vol_data = self.vol_data
         self.worker_piston.prs_data = self.prs_data
+        self.worker_piston.mode = self.mode
 
         # Connecting the interface buttons to the functions inside the separate threads
         self.piston_raise_btn.clicked.connect(self.worker_piston.piston_raise)
@@ -541,7 +694,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
     # Functions that update the interface based on feedback from the threads
     @QtCore.pyqtSlot(list)
     def update_sensors(self, sensor_data):
-        profile_time = True
+        profile_time = False
         current_time = time.time()
         # The incoming data is a list with flow and volume in liters and l/min and pressure in cmH2O
         flow = sensor_data[0]
@@ -589,16 +742,20 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
             time_at_pressure = time.time()
             print(f"After the volume graph: {time_at_pressure - time_at_volume:.4f} s")
             print(f"Total: {time_at_pressure - current_time:.4f} s")
-        if self.run_counter % 50 == 0:
-            self.vol_pw.enableAutoRange('y', True)
-            self.flw_pw.enableAutoRange('y', True)
-            self.prs_pw.enableAutoRange('y', True)
-            print(f"Enabled autorange: {self.run_counter}")
-        if self.run_counter % 50 == 1:
-            self.vol_pw.enableAutoRange('y', False)
-            self.flw_pw.enableAutoRange('y', False)
-            self.prs_pw.enableAutoRange('y', False)
-            print(f"Disabled autorange: {self.run_counter}")
+
+        # Adjust the Y range every N measurements
+        # Manually adjusting by calculating the max and min with numpy is faster than enabling and
+        # disabling the autoscale on the graph
+        N = 20
+        if self.run_counter % N == 0:
+            self.vol_pw.setYRange(np.min(self.vol_data[1, :]), np.max(self.vol_data[1, :]),
+                                  padding=self.padding)
+            self.prs_pw.setYRange(np.min(self.prs_data[1, :] - self.tare),
+                                  np.max(self.prs_data[1, :] - self.tare),
+                                  padding=self.padding)
+            self.flw_pw.setYRange(np.min(self.flw_data[1, :]), np.max(self.flw_data[1, :]),
+                                  padding=self.padding)
+            self.run_counter = 0
         self.run_counter += 1
 
     def exit(self):
@@ -657,29 +814,30 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         Mode 4 = Auto started from manual tab
         Mode 0 or else = Stop everything
         """
-        self.current_mode = mode
-        if self.current_mode == 1:  # 'VCV'
+        # Sends the update to the piston worker
+        self.worker_piston.mode = mode
+        if mode == 1:  # 'VCV'
             self.mode_VCV_btn.setEnabled(False)
             self.mode_PCV_btn.setEnabled(True)
             self.mode_PSV_btn.setEnabled(True)
             self.mode_STOP_btn.setEnabled(True)
             self.piston_auto_btn.setEnabled(True)
             self.tabWidget.setCurrentIndex(0)
-        elif self.current_mode == 2:  # 'PCV'
+        elif mode == 2:  # 'PCV'
             self.mode_VCV_btn.setEnabled(True)
             self.mode_PCV_btn.setEnabled(False)
             self.mode_PSV_btn.setEnabled(True)
             self.mode_STOP_btn.setEnabled(True)
             self.piston_auto_btn.setEnabled(True)
             self.tabWidget.setCurrentIndex(1)
-        elif self.current_mode == 3:  # 'PSV'
+        elif mode == 3:  # 'PSV'
             self.mode_VCV_btn.setEnabled(True)
             self.mode_PCV_btn.setEnabled(True)
             self.mode_PSV_btn.setEnabled(False)
             self.mode_STOP_btn.setEnabled(True)
             self.piston_auto_btn.setEnabled(True)
             self.tabWidget.setCurrentIndex(2)
-        elif self.current_mode == 4:  # 'Manual Auto'
+        elif mode == 4:  # 'Manual Auto'
             self.mode_VCV_btn.setEnabled(True)
             self.mode_PCV_btn.setEnabled(True)
             self.mode_PSV_btn.setEnabled(True)
