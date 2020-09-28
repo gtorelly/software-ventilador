@@ -839,7 +839,7 @@
                </widget>
               </item>
               <item row="5" column="1">
-               <widget class="QPushButton" name="PCV_stop_bnt">
+               <widget class="QPushButton" name="PCV_stop_btn">
                 <property name="font">
                  <font>
                   <family>Verdana</family>
@@ -2289,7 +2289,7 @@
   <tabstop>VCV_volume_plus</tabstop>
   <tabstop>VCV_volume_minus</tabstop>
   <tabstop>PCV_start_btn</tabstop>
-  <tabstop>PCV_stop_bnt</tabstop>
+  <tabstop>PCV_stop_btn</tabstop>
   <tabstop>PCV_rise_time_minus</tabstop>
   <tabstop>PCV_rise_time_plus</tabstop>
   <tabstop>PCV_frequency_minus</tabstop>
