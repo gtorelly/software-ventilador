@@ -7,7 +7,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
+    <width>773</width>
     <height>600</height>
    </rect>
   </property>
@@ -153,21 +153,9 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="VCV_volume_val">
-                  <property name="minimumSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>ml</string>
+                 <widget class="QDoubleSpinBox" name="VCV_volume_spb">
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
                  </widget>
                 </item>
@@ -254,21 +242,9 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="VCV_frequency_val">
-                  <property name="minimumSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>rpm</string>
+                 <widget class="QDoubleSpinBox" name="VCV_frequency_spb">
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
                  </widget>
                 </item>
@@ -355,21 +331,9 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="VCV_flow_val">
-                  <property name="minimumSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>L/min</string>
+                 <widget class="QDoubleSpinBox" name="VCV_flow_spb">
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
                  </widget>
                 </item>
@@ -447,21 +411,9 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="VCV_inhale_pause_val">
-                  <property name="minimumSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>s</string>
+                 <widget class="QDoubleSpinBox" name="VCV_inhale_pause_spb">
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
                  </widget>
                 </item>
@@ -600,15 +552,9 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="PCV_pressure_val">
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>cm H2O</string>
+                 <widget class="QDoubleSpinBox" name="PCV_pressure_spb">
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
                  </widget>
                 </item>
@@ -680,15 +626,9 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="PCV_frequency_val">
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>rpm</string>
+                 <widget class="QDoubleSpinBox" name="PCV_frequency_spb">
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
                  </widget>
                 </item>
@@ -760,15 +700,9 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="PCV_inhale_time_val">
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>s</string>
+                 <widget class="QDoubleSpinBox" name="PCV_inhale_time_spb">
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
                  </widget>
                 </item>
@@ -840,15 +774,9 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="PCV_rise_time_val">
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>s</string>
+                 <widget class="QDoubleSpinBox" name="PCV_rise_time_spb">
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
                  </widget>
                 </item>
@@ -951,15 +879,9 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="PCV_inhale_pause_val">
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>s</string>
+                 <widget class="QDoubleSpinBox" name="PCV_inhale_pause_spb">
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
                  </widget>
                 </item>
@@ -1055,15 +977,9 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="PSV_pressure_val">
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>cm H2O</string>
+                 <widget class="QDoubleSpinBox" name="PSV_pressure_spb">
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
                  </widget>
                 </item>
@@ -1135,15 +1051,9 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="PSV_rise_time_val">
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>s</string>
+                 <widget class="QDoubleSpinBox" name="PSV_rise_time_spb">
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
                  </widget>
                 </item>
@@ -1246,15 +1156,9 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="PSV_inhale_pause_val">
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>s</string>
+                 <widget class="QDoubleSpinBox" name="PCV_inhale_pause_spb_2">
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
                  </widget>
                 </item>
