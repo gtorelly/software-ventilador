@@ -15,9 +15,6 @@ from hw_adc_pressure import pressure_gauge
 from hw_flowmeter import flowmeter
 from hw_piston import pneumatic_piston
 
-UI_UPDATE_FREQUENCY = 15 # Hz
-UI_UPDATE_PERIOD = 1 / UI_UPDATE_FREQUENCY
-
 class ReadSensors(QtCore.QObject):
     """
     This class is used to create a thread that reads information from the sensor continuously.
@@ -33,31 +30,48 @@ class ReadSensors(QtCore.QObject):
         self.meter = meter
         self.gauge = gauge
         self.gui = gui
+
         
     def work(self):  # This function is what the new thread will execute
+        ui_update_frequency = 10  # Hz
+        ui_update_period = 1 / ui_update_frequency
         while(True):
             # TODO Acertar os timings
             start = time.time()
+            debug_print = False
             period = 4 # 60. / self.gui["VCV_frequency_dSpinBox"].value()
             instant = 0.4
+
             flow = self.meter.calc_flow(instant)
-            # flow_time = time.time()
-            # print(f"Runtime - calc_flow: {flow_time - start:.4f} s")
+
+            if debug_print == True:
+                flow_time = time.time()
+                print(f"Runtime - calc_flow: {1000 * (flow_time - start):.0f} ms")
+
             volume = self.meter.calc_volume(period)
-            # volume_time = time.time()
-            # print(f"Runtime - calc_volume: {volume_time - flow_time:.4f} s")
+
+            if debug_print == True:
+                volume_time = time.time()
+                print(f"Runtime - calc_volume: {1000 * (volume_time - flow_time):.0f} ms")
+
             pressure = self.gauge.read_pressure()
-            # pressure_time = time.time()
-            # print(f"Runtime - read_pressure: {pressure_time - volume_time:.4f} s")
-            runtime = time.time() - start
-            # print(f"Runtime - total: {runtime:.4f} s")
-            if runtime < UI_UPDATE_PERIOD:
-                time.sleep(UI_UPDATE_PERIOD - runtime)
+
+            if debug_print == True:
+                pressure_time = time.time()
+                print(f"Runtime - read_pressure: {1000 * (pressure_time - volume_time):.0f} ms")
+
             self.signal_sensors.emit([flow, volume, pressure])
 
-            
+            runtime = time.time() - start
+            if runtime < ui_update_period:
+                time.sleep(ui_update_period - runtime)
+                
+            if debug_print == True:
+                print(f"Runtime - total: {1000 * runtime:.0f} ms")
+
 class ControlPiston(QtCore.QObject):
     signal_piston = QtCore.pyqtSignal(bool)
+    signal_startup = QtCore.pyqtSignal(bool)
     
     def __init__(self, piston, gui, mode):
         super().__init__()
@@ -70,18 +84,14 @@ class ControlPiston(QtCore.QObject):
 
         # Variables to store the current position and next direction of the piston movement
         self.pst_pos = None
-        # Starts going down
-        self.pst_dir = 0
+        self.pst_dir = 0  # Starts going down
 
-        # self.start_up()
-        # self.controller()
-
-    def start_up(self):
+    def startup(self):
         """
         Starts the cycle until the piston moves to a known position
         """
         to = 3  # Timeout
-        start_up_cycles = 0
+        startup_cycles = 0
         limit = 20
         while self.pst_pos == None:
             if self.pst_dir == 1:
@@ -90,10 +100,11 @@ class ControlPiston(QtCore.QObject):
             else:
                 self.pst_pos = self.piston.piston_down(to)
                 self.pst_dir = 1
-            start_up_cycles += 1
-            if start_up_cycles > limit:
+            startup_cycles += 1
+            if startup_cycles > limit:
                 print("There is a problem at startup, check compressed air")
-        print(f"start_up_cycles: {start_up_cycles}")
+        print(f"startup_cycles: {startup_cycles}")
+        self.signal_startup.emit(True)
         self.controller()
 
     def controller(self):
@@ -124,21 +135,24 @@ class ControlPiston(QtCore.QObject):
         while True:
             # Stores the time at the beginning of a cycle or semi-cycle
             if self.pst_dir == 1:
+                last_cycle_dur = down_cycle_end - up_cycle_start
                 up_cycle_start = time.time()
             else:
+                last_cycle_dur = up_cycle_end - down_cycle_start
                 down_cycle_start = time.time()
-            last_cycle_dur = up_cycle_end - down_cycle_start
 
             # Uses flow for the calculation of the indexes, but flow, volume and pressure are
             # stored simultaneously, so it shouldn't make a difference
             idxs_last_cycle = np.where(time.time() - self.flw_data[0, :] < last_cycle_dur)[0]
+            # print(f"{np.max(idxs_last_cycle)} - {np.min(idxs_last_cycle)}")
 
-            if self.mode == 1: # 'VCV'
+            if self.mode == 1:  # 'VCV'
                 """
                 This mode should press the ambu until the desired volume is reached. The maximum
                 flow limits how fast the volume is pumped. The frequency defines the period between
                 two breaths.
                 """
+                print("VCV")
                 # Reading the relevant values from the interface
                 tgt_per = 60. / self.gui["VCV_frequency_dSpinBox"].value()
                 max_flw = self.gui["VCV_flow_dSpinBox"].value()
@@ -150,22 +164,33 @@ class ControlPiston(QtCore.QObject):
                     first_cycle = False
                     # Defines how long each cycle takes, enabling the volume control
                     t_move_up = tgt_per - t_move_down
-                    break
-
+                    continue  # skips the rest of the loop on the first cycle
                 # Calculate the peak volume and flow for the last cycle
-                peak_flw = np.max(self.flw_data[1, idxs_last_cycle])
+                try:
+                    peak_flw = np.max(self.flw_data[1, idxs_last_cycle])
+                except:
+                    peak_flw = 0
                 print(f"Peak flow: {peak_flw:.1f}")
-                peak_vol = np.max(self.vol_data[1, idxs_last_cycle])
+                try:
+                    peak_vol = np.max(self.vol_data[1, idxs_last_cycle])
+                except:
+                    peak_vol = 0
                 print(f"Peak volume: {peak_vol:.1f}")
 
                 if peak_flw > max_flw:
                     print("Flow is too high, close valve")
                     
                 if peak_vol > tgt_vol * (1.0 + margin):
-                    t_move_down = t_move_down * tgt_vol / peak_vol
+                    if peak_vol == 0:  # Avoiding a division by zero
+                        t_move_down  = t_move_down * (1.0 - margin)
+                    else:  # Proportional reduction
+                        t_move_down = t_move_down * tgt_vol / peak_vol
                     print(f"Volume is too high, reducing t_move_down to {t_move_down:.2f}")
                 if peak_vol < tgt_vol * (1.0 - margin):
-                    new_t_move_down = t_move_down * tgt_vol / peak_vol
+                    if peak_vol == 0:  # Avoiding a division by zero
+                        new_t_move_down  = t_move_down * (1.0 + margin)
+                    else:  # Proportional increase
+                        new_t_move_down = t_move_down * tgt_vol / peak_vol
                     if new_t_move_down > tgt_per * 0.5:
                         t_move_down = tgt_per * 0.5
                         print(f"t_move_down is too long, limited at 50% cycle: {t_move_down:.2f}")
@@ -198,7 +223,10 @@ class ControlPiston(QtCore.QObject):
                 t_move_up = tgt_per - t_move_down - t_wait_down
                     
                 # Calculate the peak pressure during the last cycle
-                peak_prs = np.max(self.prs_data[1, idxs_last_cycle])
+                try:
+                    peak_prs = np.max(self.prs_data[1, idxs_last_cycle])
+                except:
+                    peak_prs = 0
                 if peak_prs > tgt_prs * (1 + margin):
                     print(f"Peak pressure {peak_prs:.1f} cmH2O is too high, close valve")
                 elif peak_prs < tgt_prs * (1 - margin):
@@ -216,33 +244,40 @@ class ControlPiston(QtCore.QObject):
                 t_move_up = t_move_down
 
                 # Calculate the peak pressure during the last cycle
-                # TODO If idxs_last_cycle is None, the function fails
-                peak_prs = np.max(self.prs_data[1, idxs_last_cycle])
-                if peak_prs > tgt_prs * (1 + margin):
-                    print(f"Peak pressure {peak_prs:.1f} cmH2O is too high, close valve")
-                elif peak_prs < tgt_prs * (1 - margin):
-                    print(f"Peak pressure {peak_prs:.1f} cmH2O is too low, open valve")
-                else:
-                    print(f"Peak pressure is within 10% of {target_prs:.1f}: {peak_prs:.1f} cmH2O")
+                # try:
+                #     peak_prs = np.max(self.prs_data[1, idxs_last_cycle])
+                # except:
+                #     peak_prs = 0
+                # if peak_prs > tgt_prs * (1 + margin):
+                #     print(f"Peak pressure {peak_prs:.1f} cmH2O is too high, close valve")
+                # elif peak_prs < tgt_prs * (1 - margin):
+                #     print(f"Peak pressure {peak_prs:.1f} cmH2O is too low, open valve")
+                # else:
+                #     print(f"Peak pressure is within 10% of {tgt_prs:.1f}: {peak_prs:.1f} cmH2O")
 
-                sens_range = 0.1
+                sens_range = 0.2
                 ids_prs = np.where(time.time() - self.prs_data[0, :] < sens_range)[0]
-                prs_trigger = np.mean(self.prs_data[1, ids_prs])
+                try:
+                    prs_trigger = np.mean(self.prs_data[1, ids_prs])
+                except:
+                    prs_trigger = np.inf
+                threshold = np.percentile(self.prs_data[1, :], 5)
                 # If the piston went down, now it needs to go up
                 if self.pst_dir == 0:
                     self.pst_dir = 1
                 # if it did not go down, but triggers the low pressure, then go down
-                elif prs_trigger < np.percentile(self.prs_data[1, :], 10):
+                elif prs_trigger < threshold:
+                    print("Triggered")
                     self.pst_dir = 0
                 else:
-                    # do nothing
+                    time.sleep(sens_range / 2)
                     self.pst_dir = 2
 
             elif self.mode == 4:  # 'Manual Auto'
                 print('Manual')
 
             else:  # STOP
-                print('STOP')
+                # print('STOP')
                 # Does not perform the movements below, just waits and continues to the next cycle
                 time.sleep(0.5)
                 continue
@@ -251,6 +286,7 @@ class ControlPiston(QtCore.QObject):
             if self.mode in [1, 2, 3, 4]:
                 move_start = time.time()
                 if self.pst_dir == 0:  # Should move down
+                    # print("piston move down")
                     # the movement will last a maximum of "t_move_down"
                     self.piston.piston_down(t_move_down)
                     # Waits until t_move_down is completed, in case the piston descended faster
@@ -261,10 +297,12 @@ class ControlPiston(QtCore.QObject):
                     if t_wait_down > 0:
                         time.sleep(t_wait_down)
                     # t_end_move_down = time.time()
-                    self.pst_dir = 1
+                    if self.mode in [1, 2]:
+                        self.pst_dir = 1
                     down_cycle_end = time.time()
                 
                 elif self.pst_dir == 1:  # Should move up
+                    # print("piston move up")
                     self.piston.piston_up(t_move_up)
                     move_up_dur = time.time() - move_start
                     # If this movement was faster than the expected duration, wait
@@ -273,10 +311,12 @@ class ControlPiston(QtCore.QObject):
                     # if the piston needs to wait in the up position
                     if t_wait_up > 0:
                         time.sleep(t_wait_up)
-                    self.pst_dir = 0
+                    if self.mode in [1, 2]:
+                        self.pst_dir = 0
                     up_cycle_end = time.time()
 
                 else:  # Should do nothing
+                    #print("do nothing")
                     continue
 
         
@@ -588,7 +628,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         # Starting the graphs and threads
         self.create_graphs()
         self.create_threads()
-
+    
     def create_threads(self):
         """
         Creating the threads that will update the GUI
@@ -625,23 +665,23 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.worker_piston = ControlPiston(self.piston, gui_items, mode=0)
         self.thread_piston = QtCore.QThread()
         self.worker_piston.moveToThread(self.thread_piston)
-
         # Another way of passing variables to threads
         # This is done again at every loop where flow, pressure and volume are updated
         self.worker_piston.flw_data = self.flw_data
         self.worker_piston.vol_data = self.vol_data
         self.worker_piston.prs_data = self.prs_data
         # self.worker_piston.mode = self.mode
-
         # Connecting the interface buttons to the functions inside the separate threads
-        self.piston_raise_btn.clicked.connect(self.worker_piston.piston_raise)
-        self.piston_lower_btn.clicked.connect(self.worker_piston.piston_lower)
-        self.piston_auto_btn.clicked.connect(self.worker_piston.piston_auto)
+        # self.piston_raise_btn.clicked.connect(self.worker_piston.piston_raise)
+        # self.piston_lower_btn.clicked.connect(self.worker_piston.piston_lower)
+        # self.piston_auto_btn.clicked.connect(self.worker_piston.piston_auto)
         # self.mode_VCV_btn.clicked.connect(self.worker_piston.mode_VCV)
         # self.mode_PCV_btn.clicked.connect(self.worker_piston.mode_PCV)
         # self.mode_PSV_btn.clicked.connect(self.worker_piston.mode_PSV)
-        self.startup_btn.clicked.connect(self.worker_piston.start_up)
-        self.piston_auto_btn.clicked.connect(self.worker_piston.piston_auto)
+        self.worker_piston.signal_startup.connect(self.startup_update_gui)
+        self.startup_btn.clicked.connect(self.worker_piston.startup)
+        # self.piston_auto_btn.clicked.connect(self.worker_piston.piston_auto)
+        # self.thread_piston.started.connect(self.worker_piston.controller)
         self.thread_piston.start()
         
     def piston_delay(self, which, operation):
@@ -696,16 +736,14 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.vol_data[0, :] = start_time
         
         # Plot settings
-        bg_color = (0,  0,  50)  # Definition of the background color in RGB
-        pen_color = (255, 255, 255)  # Definition of the pen color in RGB
-        plot_pen = pg.mkPen(color=pen_color, width=2)
+        bg_color = "#000032"  # Background color
+        pen_color = "#FFFFFF"  # Pen color
+        plot_pen = pg.mkPen(color=pen_color, width=3)
         # For some reason the color definition is different inside "styles"
-        self.styles = {'color': '#FFF', 'font-size':'12pt'}
+        self.styles = {'color': '#FFFFFF', 'font-size':'12pt'}
         self.time_range = [-20, 0]
-        self.padding = 0.02
-        # TODO Configure a simple autoscale method, because the automatic autoscale slows down the 
-        # program
-        
+        self.padding = 0.01
+
         # Configuration of the pressure plot
         self.prs_pw.setBackground(bg_color) # Set the background color
         self.prs_pw.setMenuEnabled(False) # Disables the menu
@@ -713,11 +751,11 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.prs_pw.setTitle("Pressão (cm H2O)", **self.styles)
         self.prs_pw.showGrid(x=True, y=True)
         self.prs_pw.setLabel(axis='bottom', text='Tempo (s)', **self.styles)
-        self.prs_pw.setXRange(self.time_range[0], self.time_range[1], padding=self.padding)
+        self.prs_pw.setXRange(self.time_range[0], self.time_range[1], self.padding)
         self.prs_min = 0
         self.prs_max = 40
-        self.prs_pw.setYRange(self.prs_min, self.prs_max, padding=self.padding)
-#        prs_pw.setDownsampling(ds=True, auto=True) # Conferir se faz diferença no desempenho
+        self.prs_pw.setYRange(self.prs_min, self.prs_max, self.padding)
+        #prs_pw.setDownsampling(ds=True, auto=True) # Conferir se faz diferença no desempenho
         self.prs_graph = self.prs_pw.plot(self.prs_data[0, :], self.prs_data[1, :], pen=plot_pen)
         
         # Configuration of the flow plot
@@ -726,11 +764,11 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         # The title size doesn't change with the style
         self.flw_pw.setTitle("Fluxo (l/min)", **self.styles)
         self.flw_pw.showGrid(x=True, y=True)
-        self.flw_pw.setXRange(self.time_range[0], self.time_range[1], padding=self.padding)
+        self.flw_pw.setXRange(self.time_range[0], self.time_range[1], self.padding)
         self.flw_min = 0
         self.flw_max = 10
-        self.flw_pw.setYRange(self.flw_min, self.flw_max, padding=self.padding)
-#        flw_pw.setDownsampling(ds=True, auto=True) # Conferir se faz diferença no desempenho
+        self.flw_pw.setYRange(self.flw_min, self.flw_max, self.padding)
+        # flw_pw.setDownsampling(ds=True, auto=True) # Conferir se faz diferença no desempenho
         self.flw_graph = self.flw_pw.plot(self.flw_data[0, :], self.flw_data[1, :], pen=plot_pen)
         
         # Configuration of the volume plot
@@ -739,11 +777,11 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         # The title size doesn't change with the style
         self.vol_pw.setTitle("Volume (ml)", **self.styles)
         self.vol_pw.showGrid(x=True, y=True)
-        self.vol_pw.setXRange(self.time_range[0], self.time_range[1], padding=self.padding)
+        self.vol_pw.setXRange(self.time_range[0], self.time_range[1], self.padding)
         self.vol_min = 0
         self.vol_max = 200
-        self.vol_pw.setYRange(self.vol_min, self.vol_max, padding=self.padding)
-#        vol_pw.setDownsampling(ds=True, auto=True) # Conferir se faz diferença no desempenho
+        self.vol_pw.setYRange(self.vol_min, self.vol_max, self.padding)
+        # vol_pw.setDownsampling(ds=True, auto=True) # Conferir se faz diferença no desempenho
         self.vol_graph = self.vol_pw.plot(self.vol_data[0, :], self.vol_data[1, :], pen=plot_pen)
         # Adding text inside the graph
         self.vol_lbl.setText("TEST")
@@ -782,7 +820,8 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         # Updates the data that is given to the piston function
         self.worker_piston.vol_data = self.vol_data
         mean_pts = 50
-        FPS = np.nan_to_num(1.0 / np.mean(self.vol_data[0, 0:mean_pts] - self.vol_data[0, 1:1+mean_pts]))
+        FPS = np.nan_to_num(1.0 / np.mean(self.vol_data[0, 0:mean_pts] - 
+                            self.vol_data[0, 1:1+mean_pts]))
         self.vol_lbl.setText(f"FPS: {FPS:.1f}")
         if profile_time == True:
             time_at_volume = time.time()
@@ -797,7 +836,8 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         # Update the graph data
         self.prs_graph.setData(self.prs_data[0, :] - current_time, self.prs_data[1, :] - self.tare)
         # Updates the graph title
-        self.prs_pw.setTitle(f"Pressão: {np.round(self.prs_data[1, 0] - self.tare, 1):.1f} cm H2O", **self.styles)
+        self.prs_pw.setTitle(f"Pressão: {np.round(self.prs_data[1, 0] - self.tare, 1):.1f} cm H2O",
+                             **self.styles)
         # Updates the data that is given to the piston function
         self.worker_piston.prs_data = self.prs_data
         if profile_time == True:
@@ -811,12 +851,12 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         N = 20
         if self.run_counter % N == 0:
             self.vol_pw.setYRange(np.min(self.vol_data[1, :]), np.max(self.vol_data[1, :]),
-                                  padding=self.padding)
+                                  self.padding)
             self.prs_pw.setYRange(np.min(self.prs_data[1, :] - self.tare),
                                   np.max(self.prs_data[1, :] - self.tare),
-                                  padding=self.padding)
+                                  self.padding)
             self.flw_pw.setYRange(np.min(self.flw_data[1, :]), np.max(self.flw_data[1, :]),
-                                  padding=self.padding)
+                                  self.padding)
             self.run_counter = 0
         self.run_counter += 1
 
@@ -826,7 +866,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
     def showAbout(self):
         self.About = AboutWindow()
         self.About.show()
-        
+    
     def start_interface(self):
         """
         This function fills the interface with the proper values for each of the properties at start
@@ -834,6 +874,15 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         """
         # Always shown elements
         self.inhale_pause_dSpinBox.setValue(1)
+        self.inhale_time_val.setText("0,0 s")
+        self.exhale_time_val.setText("0,0 s")
+        self.IE_ratio_val.setText("1:1")
+        self.peak_pressure_val.setText("0,0 cm H2O")
+        self.tidal_volume_val.setText("0 ml")
+        self.mode_VCV_btn.setEnabled(False)
+        self.mode_PCV_btn.setEnabled(False)
+        self.mode_PSV_btn.setEnabled(False)
+        self.mode_STOP_btn.setEnabled(False)
         # VCV Tab
         self.VCV_volume_dSpinBox.setValue(300)
         self.VCV_frequency_dSpinBox.setValue(12)
@@ -866,7 +915,18 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.al_frequency_max_dSpinBox.setValue(20)
         self.al_apnea_min_dSpinBox.setValue(0)
         self.al_apnea_max_dSpinBox.setValue(100)
+
+    @QtCore.pyqtSlot(bool)
+    def startup_update_gui(self):
+        self.mode_VCV_btn.setEnabled(True)
+        self.mode_PCV_btn.setEnabled(True)
+        self.mode_PSV_btn.setEnabled(True)
+        self.mode_STOP_btn.setEnabled(True)
+        self.startup_btn.setEnabled(False)
+
+    def update_gui_data(self):
         
+
     def modes(self, mode):
         """
         Defines the current mode based on the user's selection
