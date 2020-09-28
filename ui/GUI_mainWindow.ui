@@ -1156,7 +1156,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QDoubleSpinBox" name="PCV_inhale_pause_spb_2">
+                 <widget class="QDoubleSpinBox" name="PSV_inhale_pause_spb">
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
