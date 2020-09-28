@@ -611,6 +611,8 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.piston_top_delay_plus_btn.clicked.connect(lambda: self.piston_delay('top', '+'))
         self.piston_bottom_delay_minus_btn.clicked.connect(lambda: self.piston_delay('bottom', '-'))
         self.piston_bottom_delay_plus_btn.clicked.connect(lambda: self.piston_delay('bottom', '+'))
+        self.VCV_volume_minus.clicked.connect(lambda: self.change_value(self.VCV_volume_spb, 5))
+        self.VCV_volume_minus.clicked.connect(lambda: self.change_value(self.VCV_volume_spb, -5))
         self.mode_VCV_btn.clicked.connect(lambda: self.modes(1))
         self.mode_PCV_btn.clicked.connect(lambda: self.modes(2))
         self.mode_PSV_btn.clicked.connect(lambda: self.modes(3))
@@ -925,6 +927,20 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.startup_btn.setEnabled(False)
 
     def update_gui_data(self):
+        # Tabs
+
+        # Lower half
+        self.inhale_time_val.setText("0,0 s")
+        self.exhale_time_val.setText("0,0 s")
+        self.IE_ratio_val.setText("1:1")
+        self.peak_pressure_val.setText("0,0 cm H2O")
+        self.tidal_volume_val.setText("0 ml")
+
+    def change_value(self, spinbox, increment):
+        """
+        Function to update the value of the spinboxes when they're clicked or modified
+        """
+        spinbox.setValue(spinbox.value() + increment)
         
 
     def modes(self, mode):
