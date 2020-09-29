@@ -88,7 +88,7 @@
            <enum>Qt::WheelFocus</enum>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="VCV_tab">
            <attribute name="title">
@@ -1157,6 +1157,9 @@
                 </item>
                 <item>
                  <widget class="QDoubleSpinBox" name="PSV_inhale_pause_spb">
+                  <property name="styleSheet">
+                   <string notr="true">font: 8pt &quot;Wingdings&quot;;</string>
+                  </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
