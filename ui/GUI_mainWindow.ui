@@ -7,14 +7,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>773</width>
+    <width>1024</width>
     <height>600</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="minimumSize">
    <size>
-    <width>600</width>
-    <height>400</height>
+    <width>1024</width>
+    <height>600</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -23,35 +29,76 @@
     <height>600</height>
    </size>
   </property>
+  <property name="baseSize">
+   <size>
+    <width>1024</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Verdana</family>
+    <pointsize>20</pointsize>
+    <stylestrategy>PreferAntialias</stylestrategy>
+    <kerning>true</kerning>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
+  </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>true</bool>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="autoFillBackground">
     <bool>false</bool>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="2,1">
+      <property name="spacing">
+       <number>0</number>
+      </property>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0">
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <property name="sizeConstraint">
          <enum>QLayout::SetDefaultConstraint</enum>
         </property>
         <property name="leftMargin">
-         <number>2</number>
+         <number>0</number>
         </property>
         <property name="topMargin">
-         <number>2</number>
+         <number>0</number>
         </property>
         <property name="rightMargin">
-         <number>2</number>
+         <number>0</number>
         </property>
         <property name="bottomMargin">
-         <number>2</number>
+         <number>0</number>
         </property>
         <item>
          <layout class="QVBoxLayout" name="volume_graph_VBox">
+          <property name="spacing">
+           <number>0</number>
+          </property>
           <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
@@ -68,142 +115,96 @@
          </layout>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="flow_graph_VBox"/>
+         <layout class="QVBoxLayout" name="flow_graph_VBox">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+         </layout>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="pressure_graph_VBox"/>
+         <layout class="QVBoxLayout" name="pressure_graph_VBox">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+         </layout>
         </item>
        </layout>
       </item>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>0</number>
+        </property>
         <item>
          <widget class="QTabWidget" name="tabWidget">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="font">
            <font>
+            <family>Verdana</family>
             <pointsize>20</pointsize>
+            <stylestrategy>PreferAntialias</stylestrategy>
+            <kerning>true</kerning>
            </font>
           </property>
           <property name="focusPolicy">
            <enum>Qt::WheelFocus</enum>
           </property>
           <property name="currentIndex">
-           <number>2</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="VCV_tab">
            <attribute name="title">
             <string>VCV</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_9">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
             <item>
              <layout class="QFormLayout" name="formLayout">
+              <property name="horizontalSpacing">
+               <number>0</number>
+              </property>
+              <property name="verticalSpacing">
+               <number>0</number>
+              </property>
               <item row="0" column="0">
-               <widget class="QLabel" name="VCV_volume_lbl">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>30</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <family>Verdana</family>
-                  <pointsize>20</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Volume</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <layout class="QHBoxLayout" name="horizontalLayout_3">
-                <item>
-                 <widget class="QPushButton" name="VCV_volume_minus">
-                  <property name="minimumSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>50</width>
-                    <height>50</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>-</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QDoubleSpinBox" name="VCV_volume_spb">
-                  <property name="buttonSymbols">
-                   <enum>QAbstractSpinBox::NoButtons</enum>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="VCV_volume_plus">
-                  <property name="minimumSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>50</width>
-                    <height>50</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>+</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="1" column="0">
                <widget class="QLabel" name="VCV_frequency_lbl">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>30</width>
-                  <height>30</height>
+                  <width>200</width>
+                  <height>50</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
                   <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
@@ -214,14 +215,17 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
+              <item row="0" column="1">
                <layout class="QHBoxLayout" name="horizontalLayout_2">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
                 <item>
                  <widget class="QPushButton" name="VCV_frequency_minus">
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -233,7 +237,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -243,8 +251,35 @@
                 </item>
                 <item>
                  <widget class="QDoubleSpinBox" name="VCV_frequency_spb">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
+                  </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="suffix">
+                   <string> rpm</string>
+                  </property>
+                  <property name="decimals">
+                   <number>0</number>
+                  </property>
+                  <property name="minimum">
+                   <double>2.000000000000000</double>
+                  </property>
+                  <property name="maximum">
+                   <double>40.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>12.000000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -252,8 +287,8 @@
                  <widget class="QPushButton" name="VCV_frequency_plus">
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -265,7 +300,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -275,24 +314,26 @@
                 </item>
                </layout>
               </item>
-              <item row="2" column="0">
+              <item row="1" column="0">
                <widget class="QLabel" name="VCV_flow_lbl">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>30</width>
-                  <height>30</height>
+                  <width>200</width>
+                  <height>50</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
                   <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
@@ -303,14 +344,17 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
+              <item row="1" column="1">
                <layout class="QHBoxLayout" name="horizontalLayout">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
                 <item>
                  <widget class="QPushButton" name="VCV_flow_minus">
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -322,7 +366,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -332,8 +380,32 @@
                 </item>
                 <item>
                  <widget class="QDoubleSpinBox" name="VCV_flow_spb">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
+                  </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="suffix">
+                   <string> L/min</string>
+                  </property>
+                  <property name="decimals">
+                   <number>0</number>
+                  </property>
+                  <property name="maximum">
+                   <double>20.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>5.000000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -341,8 +413,8 @@
                  <widget class="QPushButton" name="VCV_flow_plus">
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -354,7 +426,137 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>+</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="VCV_volume_lbl">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Volume</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_3">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QPushButton" name="VCV_volume_minus">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>50</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <family>Verdana</family>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>-</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="VCV_volume_spb">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="suffix">
+                   <string> ml</string>
+                  </property>
+                  <property name="decimals">
+                   <number>0</number>
+                  </property>
+                  <property name="maximum">
+                   <double>1000.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>300.000000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="VCV_volume_plus">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>50</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <family>Verdana</family>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -365,17 +567,79 @@
                </layout>
               </item>
               <item row="3" column="0">
-               <widget class="QPushButton" name="VCV_inhale_pause_btn">
+               <widget class="QLabel" name="label_3">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="minimumSize">
                  <size>
-                  <width>30</width>
-                  <height>30</height>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_14">
+                <item>
+                 <widget class="QLabel" name="label_4">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>200</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>200</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="4" column="0">
+               <widget class="QPushButton" name="VCV_inhale_pause_btn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
                   <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
@@ -383,15 +647,18 @@
                 </property>
                </widget>
               </item>
-              <item row="3" column="1">
+              <item row="4" column="1">
                <layout class="QHBoxLayout" name="horizontalLayout_5">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
                 <item>
                  <widget class="QPushButton" name="VCV_inhale_pause_minus">
-                  <property name="minimumSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
                   </property>
                   <property name="maximumSize">
                    <size>
@@ -402,7 +669,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -412,13 +683,46 @@
                 </item>
                 <item>
                  <widget class="QDoubleSpinBox" name="VCV_inhale_pause_spb">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
+                  </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="suffix">
+                   <string> s</string>
+                  </property>
+                  <property name="decimals">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <double>10.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.100000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>1.000000000000000</double>
                   </property>
                  </widget>
                 </item>
                 <item>
                  <widget class="QPushButton" name="VCV_inhale_pause_plus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="maximumSize">
                    <size>
                     <width>50</width>
@@ -428,7 +732,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -438,30 +746,26 @@
                 </item>
                </layout>
               </item>
-              <item row="4" column="0">
+              <item row="5" column="0">
                <widget class="QPushButton" name="VCV_start_btn">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>30</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="sizeIncrement">
-                 <size>
-                  <width>100</width>
-                  <height>60</height>
+                  <width>200</width>
+                  <height>50</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
                   <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
@@ -469,7 +773,7 @@
                 </property>
                </widget>
               </item>
-              <item row="4" column="1">
+              <item row="5" column="1">
                <widget class="QPushButton" name="VCV_stop_btn">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -479,24 +783,20 @@
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>30</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="sizeIncrement">
-                 <size>
-                  <width>100</width>
-                  <height>60</height>
+                  <width>170</width>
+                  <height>50</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
                   <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
-                 <string>Parar</string>
+                 <string>Parar VCV</string>
                 </property>
                </widget>
               </item>
@@ -509,29 +809,82 @@
             <string>PCV</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_3">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
             <item>
              <layout class="QFormLayout" name="formLayout_2">
+              <property name="horizontalSpacing">
+               <number>0</number>
+              </property>
+              <property name="verticalSpacing">
+               <number>0</number>
+              </property>
               <item row="0" column="0">
-               <widget class="QLabel" name="PCV_pressure_lbl">
+               <widget class="QLabel" name="PCV_frequency_lbl">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
                   <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
-                 <string>Pressão</string>
+                 <string>Frequência</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
               <item row="0" column="1">
-               <layout class="QHBoxLayout" name="horizontalLayout_10">
+               <layout class="QHBoxLayout" name="horizontalLayout_7">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
                 <item>
-                 <widget class="QPushButton" name="PCV_pressure_minus">
+                 <widget class="QPushButton" name="PCV_frequency_minus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -543,7 +896,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -552,18 +909,51 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QDoubleSpinBox" name="PCV_pressure_spb">
+                 <widget class="QDoubleSpinBox" name="PCV_frequency_spb">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
+                  </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="suffix">
+                   <string> rpm</string>
+                  </property>
+                  <property name="decimals">
+                   <number>0</number>
+                  </property>
+                  <property name="minimum">
+                   <double>2.000000000000000</double>
+                  </property>
+                  <property name="maximum">
+                   <double>50.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>12.000000000000000</double>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="PCV_pressure_plus">
+                 <widget class="QPushButton" name="PCV_frequency_plus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -575,7 +965,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -586,26 +980,61 @@
                </layout>
               </item>
               <item row="1" column="0">
-               <widget class="QLabel" name="PCV_frequency_lbl">
+               <widget class="QLabel" name="PCV_rise_time_lbl">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
                   <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
-                 <string>Frequência</string>
+                 <string>Tempo Subida</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
               <item row="1" column="1">
-               <layout class="QHBoxLayout" name="horizontalLayout_7">
+               <layout class="QHBoxLayout" name="horizontalLayout_4">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
                 <item>
-                 <widget class="QPushButton" name="PCV_frequency_minus">
+                 <widget class="QPushButton" name="PCV_rise_time_minus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -617,7 +1046,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -626,18 +1059,51 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QDoubleSpinBox" name="PCV_frequency_spb">
+                 <widget class="QDoubleSpinBox" name="PCV_rise_time_spb">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
+                  </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="suffix">
+                   <string> s</string>
+                  </property>
+                  <property name="decimals">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <double>10.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.100000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>0.500000000000000</double>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="PCV_frequency_plus">
+                 <widget class="QPushButton" name="PCV_rise_time_plus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -649,7 +1115,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -661,25 +1131,57 @@
               </item>
               <item row="2" column="0">
                <widget class="QLabel" name="PCV_inhale_time_lbl">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
                   <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
                  <string>Tempo Insp.</string>
                 </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
                </widget>
               </item>
               <item row="2" column="1">
                <layout class="QHBoxLayout" name="horizontalLayout_9">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
                 <item>
                  <widget class="QPushButton" name="PCV_inhale_time_minus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -691,7 +1193,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -701,17 +1207,50 @@
                 </item>
                 <item>
                  <widget class="QDoubleSpinBox" name="PCV_inhale_time_spb">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
+                  </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="suffix">
+                   <string> s</string>
+                  </property>
+                  <property name="decimals">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <double>10.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.100000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>0.500000000000000</double>
                   </property>
                  </widget>
                 </item>
                 <item>
                  <widget class="QPushButton" name="PCV_inhale_time_plus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -723,7 +1262,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -734,26 +1277,58 @@
                </layout>
               </item>
               <item row="3" column="0">
-               <widget class="QLabel" name="PCV_rise_time_lbl">
+               <widget class="QLabel" name="PCV_pressure_lbl">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
                   <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
-                 <string>Tempo Subida</string>
+                 <string>Pressão</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
               <item row="3" column="1">
-               <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <layout class="QHBoxLayout" name="horizontalLayout_10">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
                 <item>
-                 <widget class="QPushButton" name="PCV_rise_time_minus">
+                 <widget class="QPushButton" name="PCV_pressure_minus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -765,7 +1340,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -774,18 +1353,48 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QDoubleSpinBox" name="PCV_rise_time_spb">
+                 <widget class="QDoubleSpinBox" name="PCV_pressure_spb">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
+                  </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="suffix">
+                   <string> cm H2O</string>
+                  </property>
+                  <property name="decimals">
+                   <number>0</number>
+                  </property>
+                  <property name="maximum">
+                   <double>60.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>30.000000000000000</double>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="PCV_rise_time_plus">
+                 <widget class="QPushButton" name="PCV_pressure_plus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -797,7 +1406,155 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>+</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="4" column="0">
+               <widget class="QPushButton" name="PCV_inhale_pause_btn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Pausa Insp.</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_6">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QPushButton" name="PCV_inhale_pause_minus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>50</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <family>Verdana</family>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>-</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="PCV_inhale_pause_spb">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="suffix">
+                   <string> s</string>
+                  </property>
+                  <property name="decimals">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <double>10.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.100000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>1.000000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="PCV_inhale_pause_plus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>50</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <family>Verdana</family>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -810,27 +1567,29 @@
               <item row="5" column="0">
                <widget class="QPushButton" name="PCV_start_btn">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>90</width>
+                  <width>200</width>
                   <height>50</height>
                  </size>
                 </property>
-                <property name="sizeIncrement">
+                <property name="maximumSize">
                  <size>
-                  <width>100</width>
-                  <height>60</height>
+                  <width>200</width>
+                  <height>50</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
                   <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
@@ -840,88 +1599,22 @@
               </item>
               <item row="5" column="1">
                <widget class="QPushButton" name="PCV_stop_btn">
+                <property name="minimumSize">
+                 <size>
+                  <width>170</width>
+                  <height>50</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
                   <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
                  <string>Parar PCV</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="1">
-               <layout class="QHBoxLayout" name="horizontalLayout_6">
-                <item>
-                 <widget class="QPushButton" name="PCV_inhale_pause_minus">
-                  <property name="minimumSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>50</width>
-                    <height>50</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>-</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QDoubleSpinBox" name="PCV_inhale_pause_spb">
-                  <property name="buttonSymbols">
-                   <enum>QAbstractSpinBox::NoButtons</enum>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="PCV_inhale_pause_plus">
-                  <property name="minimumSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>50</width>
-                    <height>50</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>20</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>+</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="4" column="0">
-               <widget class="QPushButton" name="PCV_inhale_pause_btn">
-                <property name="font">
-                 <font>
-                  <family>Verdana</family>
-                  <pointsize>20</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Pausa Insp.</string>
                 </property>
                </widget>
               </item>
@@ -934,29 +1627,82 @@
             <string>PSV</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_10">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
             <item>
              <layout class="QFormLayout" name="formLayout_4">
+              <property name="horizontalSpacing">
+               <number>0</number>
+              </property>
+              <property name="verticalSpacing">
+               <number>0</number>
+              </property>
               <item row="0" column="0">
                <widget class="QLabel" name="PSV_support_pressure_lbl">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
                   <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
-                 <string>Pressão Suporte</string>
+                 <string>Pressão Sup.</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
               <item row="0" column="1">
                <layout class="QHBoxLayout" name="horizontalLayout_11">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
                 <item>
                  <widget class="QPushButton" name="PSV_pressure_minus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -968,7 +1714,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -978,17 +1728,47 @@
                 </item>
                 <item>
                  <widget class="QDoubleSpinBox" name="PSV_pressure_spb">
+                  <property name="minimumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>160</width>
+                    <height>60</height>
+                   </size>
+                  </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="suffix">
+                   <string> cmH2O</string>
+                  </property>
+                  <property name="decimals">
+                   <number>0</number>
+                  </property>
+                  <property name="maximum">
+                   <double>60.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>30.000000000000000</double>
                   </property>
                  </widget>
                 </item>
                 <item>
                  <widget class="QPushButton" name="PSV_pressure_plus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -1000,7 +1780,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -1010,27 +1794,23 @@
                 </item>
                </layout>
               </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="PSV_rise_time_lbl">
-                <property name="font">
-                 <font>
-                  <family>Verdana</family>
-                  <pointsize>20</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Tempo Subida</string>
-                </property>
-               </widget>
-              </item>
               <item row="1" column="1">
                <layout class="QHBoxLayout" name="horizontalLayout_12">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
                 <item>
                  <widget class="QPushButton" name="PSV_rise_time_minus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -1042,7 +1822,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -1052,17 +1836,50 @@
                 </item>
                 <item>
                  <widget class="QDoubleSpinBox" name="PSV_rise_time_spb">
+                  <property name="minimumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>160</width>
+                    <height>60</height>
+                   </size>
+                  </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="suffix">
+                   <string> s</string>
+                  </property>
+                  <property name="decimals">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <double>10.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.100000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>0.500000000000000</double>
                   </property>
                  </widget>
                 </item>
                 <item>
                  <widget class="QPushButton" name="PSV_rise_time_plus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -1074,7 +1891,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -1084,30 +1905,32 @@
                 </item>
                </layout>
               </item>
-              <item row="3" column="0">
+              <item row="5" column="0">
                <widget class="QPushButton" name="PSV_start_btn">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>90</width>
+                  <width>200</width>
                   <height>50</height>
                  </size>
                 </property>
-                <property name="sizeIncrement">
+                <property name="maximumSize">
                  <size>
-                  <width>100</width>
-                  <height>60</height>
+                  <width>200</width>
+                  <height>50</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
                   <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
@@ -1115,12 +1938,20 @@
                 </property>
                </widget>
               </item>
-              <item row="3" column="1">
+              <item row="5" column="1">
                <widget class="QPushButton" name="PSV_stop_btn">
+                <property name="minimumSize">
+                 <size>
+                  <width>170</width>
+                  <height>50</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
                   <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
@@ -1128,14 +1959,23 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
+              <item row="4" column="1">
                <layout class="QHBoxLayout" name="horizontalLayout_13">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
                 <item>
                  <widget class="QPushButton" name="PSV_inhale_pause_minus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -1147,7 +1987,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -1157,20 +2001,61 @@
                 </item>
                 <item>
                  <widget class="QDoubleSpinBox" name="PSV_inhale_pause_spb">
+                  <property name="minimumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>160</width>
+                    <height>60</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <family>Verdana</family>
+                    <pointsize>20</pointsize>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
+                   </font>
+                  </property>
                   <property name="styleSheet">
-                   <string notr="true">font: 8pt &quot;Wingdings&quot;;</string>
+                   <string notr="true"/>
                   </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="suffix">
+                   <string> s</string>
+                  </property>
+                  <property name="decimals">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <double>10.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.100000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>1.000000000000000</double>
                   </property>
                  </widget>
                 </item>
                 <item>
                  <widget class="QPushButton" name="PSV_inhale_pause_plus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
-                    <width>30</width>
-                    <height>30</height>
+                    <width>50</width>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -1182,7 +2067,11 @@
                   <property name="font">
                    <font>
                     <family>Verdana</family>
-                    <pointsize>20</pointsize>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
                    </font>
                   </property>
                   <property name="text">
@@ -1192,16 +2081,165 @@
                 </item>
                </layout>
               </item>
-              <item row="2" column="0">
+              <item row="4" column="0">
                <widget class="QPushButton" name="PSV_inhale_pause_btn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
                   <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
                  <string>Pausa Insp.</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_15">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="label">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>200</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>200</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_2">
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_5">
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_16">
+                <item>
+                 <widget class="QLabel" name="label_6">
+                  <property name="minimumSize">
+                   <size>
+                    <width>200</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>200</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="PSV_rise_time_lbl">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>20</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Tempo Subida</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -1214,79 +2252,67 @@
             <string>Alarmes</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_11">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
             <item>
              <layout class="QGridLayout" name="gridLayout_2">
-              <item row="4" column="0">
-               <widget class="QCheckBox" name="al_paw_chkBox">
+              <property name="verticalSpacing">
+               <number>0</number>
+              </property>
+              <item row="1" column="0">
+               <widget class="QCheckBox" name="al_tidal_volume_chkBox">
                 <property name="font">
                  <font>
-                  <pointsize>15</pointsize>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
-                 <string>Paw</string>
+                 <string>V. Corrente</string>
                 </property>
                </widget>
               </item>
-              <item row="8" column="0">
-               <widget class="QCheckBox" name="al_apnea_chkBox">
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Apneia</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="0">
-               <widget class="QCheckBox" name="al_plateau_pressure_chkBox">
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Press. Platô</string>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="0">
-               <widget class="QCheckBox" name="al_frequency_chkBox">
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Frequência</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="3">
-               <widget class="QPushButton" name="al_paw_ok_btn">
+              <item row="6" column="4">
+               <widget class="QPushButton" name="al_PEEP_ok_btn">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
                   <verstretch>1</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>20</width>
-                  <height>20</height>
+                  <width>45</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>30</width>
-                  <height>30</height>
+                  <width>45</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>15</pointsize>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
@@ -1294,30 +2320,102 @@
                 </property>
                </widget>
               </item>
-              <item row="7" column="2">
-               <widget class="QDoubleSpinBox" name="al_frequency_max_dSpinBox">
+              <item row="5" column="4">
+               <widget class="QPushButton" name="al_plateau_pressure_ok_btn">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
                   <verstretch>1</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>0</width>
-                  <height>0</height>
+                  <width>45</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>100</width>
-                  <height>100</height>
+                  <width>45</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>15</pointsize>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="text">
+                 <string>OK</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="4">
+               <widget class="QPushButton" name="al_volume_minute_ok_btn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>1</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>45</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>45</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>OK</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="3">
+               <widget class="QDoubleSpinBox" name="al_plateau_pressure_max_dSpinBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>1</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::PlusMinus</enum>
                 </property>
                 <property name="decimals">
                  <number>1</number>
@@ -1330,30 +2428,267 @@
                 </property>
                </widget>
               </item>
-              <item row="5" column="2">
-               <widget class="QDoubleSpinBox" name="al_plateau_pressure_max_dSpinBox">
+              <item row="8" column="0">
+               <widget class="QCheckBox" name="al_apnea_chkBox">
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Apneia</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="1">
+               <widget class="QDoubleSpinBox" name="al_frequency_min_dSpinBox">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
                   <verstretch>1</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>0</width>
-                  <height>0</height>
+                  <width>120</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>100</width>
-                  <height>100</height>
+                  <width>120</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>15</pointsize>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::PlusMinus</enum>
+                </property>
+                <property name="decimals">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <double>100000.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QDoubleSpinBox" name="al_volume_minute_min_dSpinBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>1</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::PlusMinus</enum>
+                </property>
+                <property name="suffix">
+                 <string> L</string>
+                </property>
+                <property name="decimals">
+                 <number>0</number>
+                </property>
+                <property name="maximum">
+                 <double>50.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="3">
+               <widget class="QDoubleSpinBox" name="al_flow_max_dSpinBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>1</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::PlusMinus</enum>
+                </property>
+                <property name="decimals">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <double>100000.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QDoubleSpinBox" name="al_plateau_pressure_min_dSpinBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>1</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::PlusMinus</enum>
+                </property>
+                <property name="decimals">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <double>100000.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="3">
+               <widget class="QDoubleSpinBox" name="al_apnea_max_dSpinBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>1</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::PlusMinus</enum>
+                </property>
+                <property name="decimals">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <double>100000.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QDoubleSpinBox" name="al_paw_min_dSpinBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>1</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::PlusMinus</enum>
                 </property>
                 <property name="decimals">
                  <number>1</number>
@@ -1370,7 +2705,10 @@
                <widget class="QCheckBox" name="al_volume_minute_chkBox">
                 <property name="font">
                  <font>
-                  <pointsize>15</pointsize>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
@@ -1378,414 +2716,36 @@
                 </property>
                </widget>
               </item>
-              <item row="5" column="1">
-               <widget class="QDoubleSpinBox" name="al_plateau_pressure_min_dSpinBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                  <horstretch>1</horstretch>
-                  <verstretch>1</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>100</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
-                </property>
-                <property name="decimals">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <double>100000.000000000000000</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.100000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QCheckBox" name="al_tidal_volume_chkBox">
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>V. Corrente</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="3">
-               <widget class="QPushButton" name="al_tidal_volume_ok_btn">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                  <horstretch>1</horstretch>
-                  <verstretch>1</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>20</width>
-                  <height>20</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>30</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>OK</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="3">
-               <widget class="QPushButton" name="al_flow_ok_btn">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                  <horstretch>1</horstretch>
-                  <verstretch>1</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>20</width>
-                  <height>20</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>30</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>OK</string>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="2">
-               <widget class="QDoubleSpinBox" name="al_apnea_max_dSpinBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                  <horstretch>1</horstretch>
-                  <verstretch>1</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>100</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
-                </property>
-                <property name="decimals">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <double>100000.000000000000000</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.100000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QDoubleSpinBox" name="al_volume_minute_min_dSpinBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                  <horstretch>1</horstretch>
-                  <verstretch>1</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>100</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
-                </property>
-                <property name="decimals">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <double>100000.000000000000000</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.100000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QDoubleSpinBox" name="al_flow_min_dSpinBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                  <horstretch>1</horstretch>
-                  <verstretch>1</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>100</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
-                </property>
-                <property name="decimals">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <double>100000.000000000000000</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.100000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="2">
-               <widget class="QDoubleSpinBox" name="al_flow_max_dSpinBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                  <horstretch>1</horstretch>
-                  <verstretch>1</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>100</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
-                </property>
-                <property name="decimals">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <double>100000.000000000000000</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.100000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="2">
-               <widget class="QDoubleSpinBox" name="al_tidal_volume_max_dSpinBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                  <horstretch>1</horstretch>
-                  <verstretch>1</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>100</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
-                </property>
-                <property name="decimals">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <double>100000.000000000000000</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.100000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="3">
-               <widget class="QPushButton" name="al_volume_minute_ok_btn">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                  <horstretch>1</horstretch>
-                  <verstretch>1</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>20</width>
-                  <height>20</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>30</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>OK</string>
-                </property>
-               </widget>
-              </item>
               <item row="7" column="3">
-               <widget class="QPushButton" name="al_frequency_ok_btn">
+               <widget class="QDoubleSpinBox" name="al_frequency_max_dSpinBox">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
                   <verstretch>1</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>20</width>
-                  <height>20</height>
+                  <width>120</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>30</width>
-                  <height>30</height>
+                  <width>120</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>15</pointsize>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
-                <property name="text">
-                 <string>OK</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="2">
-               <widget class="QDoubleSpinBox" name="al_paw_max_dSpinBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                  <horstretch>1</horstretch>
-                  <verstretch>1</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>100</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
-                </property>
-                <property name="decimals">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <double>100000.000000000000000</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.100000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="1">
-               <widget class="QDoubleSpinBox" name="al_frequency_min_dSpinBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                  <horstretch>1</horstretch>
-                  <verstretch>1</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>100</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::PlusMinus</enum>
                 </property>
                 <property name="decimals">
                  <number>1</number>
@@ -1802,7 +2762,10 @@
                <widget class="QCheckBox" name="al_PEEP_chkBox">
                 <property name="font">
                  <font>
-                  <pointsize>15</pointsize>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
@@ -1810,42 +2773,36 @@
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
-               <widget class="QCheckBox" name="al_flow_chkBox">
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Fluxo</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QDoubleSpinBox" name="al_tidal_volume_min_dSpinBox">
+              <item row="4" column="3">
+               <widget class="QDoubleSpinBox" name="al_paw_max_dSpinBox">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
                   <verstretch>1</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>0</width>
-                  <height>0</height>
+                  <width>120</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>100</width>
-                  <height>100</height>
+                  <width>120</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>15</pointsize>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::PlusMinus</enum>
                 </property>
                 <property name="decimals">
                  <number>1</number>
@@ -1858,30 +2815,36 @@
                 </property>
                </widget>
               </item>
-              <item row="6" column="2">
+              <item row="6" column="3">
                <widget class="QDoubleSpinBox" name="al_PEEP_max_dSpinBox">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
                   <verstretch>1</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>0</width>
-                  <height>0</height>
+                  <width>120</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>100</width>
-                  <height>100</height>
+                  <width>120</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>15</pointsize>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::PlusMinus</enum>
                 </property>
                 <property name="decimals">
                  <number>1</number>
@@ -1894,60 +2857,36 @@
                 </property>
                </widget>
               </item>
-              <item row="5" column="3">
-               <widget class="QPushButton" name="al_plateau_pressure_ok_btn">
+              <item row="3" column="1">
+               <widget class="QDoubleSpinBox" name="al_flow_min_dSpinBox">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
                   <verstretch>1</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>20</width>
-                  <height>20</height>
+                  <width>120</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>30</width>
-                  <height>30</height>
+                  <width>120</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>15</pointsize>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
-                <property name="text">
-                 <string>OK</string>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="1">
-               <widget class="QDoubleSpinBox" name="al_PEEP_min_dSpinBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-                  <horstretch>1</horstretch>
-                  <verstretch>1</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>100</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>15</pointsize>
-                 </font>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::PlusMinus</enum>
                 </property>
                 <property name="decimals">
                  <number>1</number>
@@ -1963,27 +2902,33 @@
               <item row="8" column="1">
                <widget class="QDoubleSpinBox" name="al_apnea_min_dSpinBox">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
                   <verstretch>1</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>0</width>
-                  <height>0</height>
+                  <width>120</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>100</width>
-                  <height>100</height>
+                  <width>120</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>15</pointsize>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::PlusMinus</enum>
                 </property>
                 <property name="decimals">
                  <number>1</number>
@@ -1996,65 +2941,158 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="2">
+              <item row="7" column="0">
+               <widget class="QCheckBox" name="al_frequency_chkBox">
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Frequência</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QCheckBox" name="al_plateau_pressure_chkBox">
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Press. Platô</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QCheckBox" name="al_paw_chkBox">
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Paw</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="4">
+               <widget class="QPushButton" name="al_tidal_volume_ok_btn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>1</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>45</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>45</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>OK</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="3">
                <widget class="QDoubleSpinBox" name="al_volume_minute_max_dSpinBox">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
                   <verstretch>1</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>0</width>
-                  <height>0</height>
+                  <width>120</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>100</width>
-                  <height>100</height>
+                  <width>120</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>15</pointsize>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::PlusMinus</enum>
+                </property>
+                <property name="suffix">
+                 <string> L</string>
+                </property>
                 <property name="decimals">
-                 <number>1</number>
+                 <number>0</number>
                 </property>
                 <property name="maximum">
-                 <double>100000.000000000000000</double>
+                 <double>50.000000000000000</double>
                 </property>
                 <property name="singleStep">
-                 <double>0.100000000000000</double>
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>10.000000000000000</double>
                 </property>
                </widget>
               </item>
-              <item row="6" column="3">
-               <widget class="QPushButton" name="al_PEEP_ok_btn">
+              <item row="7" column="4">
+               <widget class="QPushButton" name="al_frequency_ok_btn">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
                   <verstretch>1</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>20</width>
-                  <height>20</height>
+                  <width>45</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>30</width>
-                  <height>30</height>
+                  <width>45</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>15</pointsize>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
@@ -2062,30 +3100,132 @@
                 </property>
                </widget>
               </item>
-              <item row="4" column="1">
-               <widget class="QDoubleSpinBox" name="al_paw_min_dSpinBox">
+              <item row="4" column="4">
+               <widget class="QPushButton" name="al_paw_ok_btn">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
                   <verstretch>1</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>0</width>
-                  <height>0</height>
+                  <width>45</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>100</width>
-                  <height>100</height>
+                  <width>45</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>15</pointsize>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="text">
+                 <string>OK</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QCheckBox" name="al_flow_chkBox">
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Fluxo</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QDoubleSpinBox" name="al_tidal_volume_max_dSpinBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>1</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::PlusMinus</enum>
+                </property>
+                <property name="suffix">
+                 <string> ml</string>
+                </property>
+                <property name="decimals">
+                 <number>0</number>
+                </property>
+                <property name="maximum">
+                 <double>1000.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>600.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="1">
+               <widget class="QDoubleSpinBox" name="al_PEEP_min_dSpinBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>1</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::PlusMinus</enum>
                 </property>
                 <property name="decimals">
                  <number>1</number>
@@ -2098,33 +3238,108 @@
                 </property>
                </widget>
               </item>
-              <item row="8" column="3">
+              <item row="3" column="4">
+               <widget class="QPushButton" name="al_flow_ok_btn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>1</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>45</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>45</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>OK</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="4">
                <widget class="QPushButton" name="al_apnea_ok_btn">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
                   <verstretch>1</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>20</width>
-                  <height>20</height>
+                  <width>45</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>30</width>
-                  <height>30</height>
+                  <width>45</width>
+                  <height>45</height>
                  </size>
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>15</pointsize>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
                  </font>
                 </property>
                 <property name="text">
                  <string>OK</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QDoubleSpinBox" name="al_tidal_volume_min_dSpinBox">
+                <property name="minimumSize">
+                 <size>
+                  <width>120</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>120</width>
+                  <height>45</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>16</pointsize>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="suffix">
+                 <string> ml</string>
+                </property>
+                <property name="decimals">
+                 <number>0</number>
+                </property>
+                <property name="maximum">
+                 <double>1000.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="value">
+                 <double>100.000000000000000</double>
                 </property>
                </widget>
               </item>
@@ -2136,12 +3351,20 @@
         </item>
         <item>
          <layout class="QFormLayout" name="formLayout_3">
+          <property name="horizontalSpacing">
+           <number>0</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>0</number>
+          </property>
           <item row="0" column="0">
            <widget class="QLabel" name="inhale_time_lbl">
             <property name="font">
              <font>
               <family>Verdana</family>
               <pointsize>20</pointsize>
+              <stylestrategy>PreferAntialias</stylestrategy>
+              <kerning>true</kerning>
              </font>
             </property>
             <property name="text">
@@ -2155,6 +3378,8 @@
              <font>
               <family>Verdana</family>
               <pointsize>20</pointsize>
+              <stylestrategy>PreferAntialias</stylestrategy>
+              <kerning>true</kerning>
              </font>
             </property>
             <property name="frameShape">
@@ -2174,6 +3399,8 @@
              <font>
               <family>Verdana</family>
               <pointsize>20</pointsize>
+              <stylestrategy>PreferAntialias</stylestrategy>
+              <kerning>true</kerning>
              </font>
             </property>
             <property name="text">
@@ -2187,6 +3414,8 @@
              <font>
               <family>Verdana</family>
               <pointsize>20</pointsize>
+              <stylestrategy>PreferAntialias</stylestrategy>
+              <kerning>true</kerning>
              </font>
             </property>
             <property name="text">
@@ -2200,6 +3429,8 @@
              <font>
               <family>Verdana</family>
               <pointsize>20</pointsize>
+              <stylestrategy>PreferAntialias</stylestrategy>
+              <kerning>true</kerning>
              </font>
             </property>
             <property name="text">
@@ -2213,6 +3444,8 @@
              <font>
               <family>Verdana</family>
               <pointsize>20</pointsize>
+              <stylestrategy>PreferAntialias</stylestrategy>
+              <kerning>true</kerning>
              </font>
             </property>
             <property name="text">
@@ -2226,6 +3459,8 @@
              <font>
               <family>Verdana</family>
               <pointsize>20</pointsize>
+              <stylestrategy>PreferAntialias</stylestrategy>
+              <kerning>true</kerning>
              </font>
             </property>
             <property name="text">
@@ -2239,6 +3474,8 @@
              <font>
               <family>Verdana</family>
               <pointsize>20</pointsize>
+              <stylestrategy>PreferAntialias</stylestrategy>
+              <kerning>true</kerning>
              </font>
             </property>
             <property name="text">
@@ -2252,6 +3489,8 @@
              <font>
               <family>Verdana</family>
               <pointsize>20</pointsize>
+              <stylestrategy>PreferAntialias</stylestrategy>
+              <kerning>true</kerning>
              </font>
             </property>
             <property name="text">
@@ -2265,6 +3504,8 @@
              <font>
               <family>Verdana</family>
               <pointsize>20</pointsize>
+              <stylestrategy>PreferAntialias</stylestrategy>
+              <kerning>true</kerning>
              </font>
             </property>
             <property name="text">
@@ -2313,7 +3554,6 @@
   <tabstop>al_plateau_pressure_chkBox</tabstop>
   <tabstop>al_PEEP_chkBox</tabstop>
   <tabstop>al_frequency_chkBox</tabstop>
-  <tabstop>al_tidal_volume_min_dSpinBox</tabstop>
   <tabstop>al_tidal_volume_chkBox</tabstop>
   <tabstop>al_paw_chkBox</tabstop>
   <tabstop>al_flow_chkBox</tabstop>
