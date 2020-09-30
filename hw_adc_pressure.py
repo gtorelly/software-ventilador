@@ -1,10 +1,9 @@
-"""
-Function that reads the ADC and converts its value to cm H2O
-"""
-
 import Adafruit_ADS1x15
 
 class pressure_gauge():
+    """
+    Setup of the ADC and Pressure gauge
+    """
     def __init__(self, parent=None):
         # Configure the ADC parameters
         address = 0x48
@@ -41,13 +40,14 @@ class pressure_gauge():
         self.gauge_max_press = 101.978  # cm H2O
     
     def read_pressure(self):
+        """
+        Function that reads the ADC and converts its value to cm H2O
+        """
         # Since the adc is reading continuously, it's just a matter of getting the last measurement
         value = self.adc.get_last_result()
         # Calculating the voltage read by the adc
-        # volt = round(((value / 32767.0) * 6.144), 2)
         volt = ((value / self.adc_read_max) * self.adc_volt_max)
         # Converting the voltage to pressure, according to the gauge's properties
-        # cmh2o = round(((volt-tara)*(101.945)/(6.144-tara)),0)
         cmh2o = self.gauge_max_press * ((volt - self.gauge_min_volt) / 
                                         (self.gauge_max_volt - self.gauge_min_volt))
         
