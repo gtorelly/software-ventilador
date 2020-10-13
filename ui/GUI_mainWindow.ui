@@ -796,7 +796,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>Parar VCV</string>
+                 <string>Parar</string>
                 </property>
                </widget>
               </item>
@@ -1614,7 +1614,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>Parar PCV</string>
+                 <string>Parar</string>
                 </property>
                </widget>
               </item>
@@ -1955,7 +1955,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>Parar PSV</string>
+                 <string>Parar</string>
                 </property>
                </widget>
               </item>
