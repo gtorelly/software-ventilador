@@ -1,9 +1,9 @@
+"""
+Setup of the ADC and Pressure gauge
+"""
 import Adafruit_ADS1x15
 
 class pressure_gauge():
-    """
-    Setup of the ADC and Pressure gauge
-    """
     def __init__(self, parent=None):
         # Configure the ADC parameters
         address = 0x48
