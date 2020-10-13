@@ -14,6 +14,7 @@ import pyqtgraph as pg
 from hw_adc_pressure import pressure_gauge
 from hw_flowmeter import flowmeter
 from hw_piston import pneumatic_piston
+from hw_buttons import btns
 
 class ReadSensors(QtCore.QObject):
     """
@@ -25,14 +26,15 @@ class ReadSensors(QtCore.QObject):
     """
     signal_sensors = QtCore.pyqtSignal(list)
     
-    def __init__(self, meter, gauge, gui):
+    # def __init__(self, meter, gauge, gui):
+    def __init__(self, gui):
         super().__init__()
-        self.meter = meter
-        self.gauge = gauge
-        self.gui = gui
+        # Classes that creates the instances of IO classes
+        self.gauge = pressure_gauge()
+        self.meter = flowmeter()
         
     def work(self):  # This function is what the new thread will execute
-        ui_update_frequency = 10  # Hz
+        ui_update_frequency = 20  # Hz
         ui_update_period = 1 / ui_update_frequency
         while(True):
             # TODO Acertar os timings
@@ -72,11 +74,11 @@ class ControlPiston(QtCore.QObject):
     signal_piston = QtCore.pyqtSignal(bool)
     signal_cycle_data = QtCore.pyqtSignal(dict)
     
-    def __init__(self, piston, gui, mode):
+    def __init__(self, gui, mode):
         super().__init__()
         # receives the piston instance from the call of this worker in the main window
         # assigns the instance to another with the same name.
-        self.piston = piston
+        self.piston = pneumatic_piston()
         self.stop = False
         self.gui = gui
         self.mode = 0
@@ -412,11 +414,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
 
         # Configuration of the default values on the interface
         self.start_interface()
-
-        # Classes that creates the instances of IO classes
-        self.gauge = pressure_gauge()
-        self.meter = flowmeter()
-        self.piston = pneumatic_piston()
+        self.buttons = btns()
 
         # Starting the graphs and threads
         self.create_graphs()
@@ -448,7 +446,8 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
                      "PSV_stop_btn": self.PSV_stop_btn}
 
         # Sensors thread
-        self.worker_sensors = ReadSensors(self.meter, self.gauge, gui_items)
+        # self.worker_sensors = ReadSensors(self.meter, self.gauge, gui_items)
+        self.worker_sensors = ReadSensors(gui_items)
         self.thread_sensors = QtCore.QThread()
         self.worker_sensors.moveToThread(self.thread_sensors)
         self.worker_sensors.signal_sensors.connect(self.update_sensors)
@@ -456,7 +455,8 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.thread_sensors.start()
         
         # Piston control thread
-        self.worker_piston = ControlPiston(self.piston, gui_items, mode=0)
+        # self.worker_piston = ControlPiston(self.piston, gui_items, mode=0)
+        self.worker_piston = ControlPiston(gui_items, mode=0)
         self.thread_piston = QtCore.QThread()
         self.worker_piston.moveToThread(self.thread_piston)
         # Another way of passing variables to threads
@@ -627,15 +627,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         idxs_tr = np.where(time.time() - self.flw_data[0, :] < 
                            self.time_range[1] - self.time_range[0])[0]
         N = 20
-        # if self.run_counter % N == 0:
-        #     self.vol_pw.setYRange(np.min(self.vol_data[1, :]), np.max(self.vol_data[1, :]),
-        #                           self.padding)
-        #     self.prs_pw.setYRange(np.min(self.prs_data[1, :]),
-        #                           np.max(self.prs_data[1, :]),
-        #                           self.padding)
-        #     self.flw_pw.setYRange(np.min(self.flw_data[1, :]), np.max(self.flw_data[1, :]),
-        #                           self.padding)
-        #     self.run_counter = 0
+
         if self.run_counter % N == 0:
             self.vol_pw.setYRange(np.min(self.vol_data[1, idxs_tr]),
                                   np.max(self.vol_data[1, idxs_tr]),
