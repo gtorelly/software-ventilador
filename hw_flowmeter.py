@@ -51,7 +51,7 @@ class flowmeter():
         flow = 60 * pulses / (self.pulses_per_liter * delta_t)  # In liters per minute   
         return flow
         
-    def store_edge_timing(self, dummy):
+    def store_edge_timing(self, triggered_pin):
         # rolls the data, eliminating the last column and inserting zero
         self.edge_timing = np.roll(self.edge_timing, -1)
         # the zeros in the end of the array receive the data

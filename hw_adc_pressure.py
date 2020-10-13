@@ -8,7 +8,7 @@ class pressure_gauge():
         # Configure the ADC parameters
         address = 0x48
         # Possible data rates (from datasheet): 8,  16, 32, 64, 128, 250, 475, 860
-        data_rate = 860
+        data_rate = 64
         # Raspberry Pi's bus number. The I2C interface is on bus 1
         busnum = 1
         # Gain: (From Adafruit's example/simpletest.py)
