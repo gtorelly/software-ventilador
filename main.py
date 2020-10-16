@@ -419,9 +419,8 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.start_interface()
 
         # Connecting the physical buttons to function in main
-        self.buttons = Buttons()
-        self.buttons.signal_increase.connect(lambda: self.spinbox_control("Increase"))
-        self.buttons.signal_decrease.connect(lambda: self.spinbox_control("Decrease"))
+        # self.buttons = Buttons()
+        # self.buttons.signal_button.connect(self.spinbox_control)
 
         # Starting the graphs and threads
         self.create_graphs()
@@ -480,6 +479,13 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.error_window.signal_retry_startup.connect(self.worker_piston.startup)
         self.thread_piston.started.connect(self.worker_piston.startup)
         self.thread_piston.start()
+
+        # Buttons control thread
+        self.worker_buttons = Buttons()
+        self.thread_buttons = QtCore.QThread()
+        self.worker_buttons.moveToThread(self.thread_buttons)
+        self.worker_buttons.signal_button.connect(self.spinbox_control)
+        self.thread_buttons.start()
         
     def create_graphs(self):
         # Definitions to create the graphs
@@ -565,7 +571,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
     # Functions that update the interface based on feedback from the threads
     @QtCore.pyqtSlot(list)
     def update_sensors(self, sensor_data):
-        profile_time = True
+        profile_time = False
         current_time = time.time()
         # The incoming data is a list with flow and volume in liters and l/min and pressure in cmH2O
         flow = sensor_data[0]
@@ -698,6 +704,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.peak_pressure_val.setText("0,0 cm H2O")
         self.tidal_volume_val.setText("0 ml")
 
+    @QtCore.pyqtSlot(str)
     def spinbox_control(self, action):
         """
         Finds the active (in focus, last clicked) spinbox and increases or decreases its value,
@@ -742,12 +749,23 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
                 current_spb = item
                 continue
 
-        if action == "Increase":
+        if action == "UP":
             self.change_value(current_spb, 1)
-        elif action == "Decrease":
+            print("UP")
+        elif action == "DOWN":
+            self.change_value(current_spb, -1)
+            print("DOWN")
+        elif action == "OK":
             # Put the next spinbox in focus
             nxt = tab_content[c_tab][(tab_content[c_tab].index(current_spb) + 1) % len(tab_content[c_tab])]
             nxt.setFocus()
+            print("OK")
+        elif action == "ROT":
+            print("ROT")
+        elif action == "CW":
+            print("CW")
+        elif action == "CCW":
+            print("CCW")
         else:
             print("I just don't get it man")
 
