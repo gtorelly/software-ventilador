@@ -1,16 +1,16 @@
 """
 Main function
 """
+import configparser
+import numpy as np
+from PyQt5 import QtWidgets,  QtCore
+import pyqtgraph as pg
+from queue import Queue
+import sys
+import time
 from ui.Ui_GUI_mainWindow import Ui_Respirador
 from ui.Ui_GUI_sobre import Ui_Sobre
 from ui.Ui_GUI_startup_error import Ui_StartupError
-import sys
-from PyQt5 import QtWidgets,  QtCore
-import time
-# Imports to create the live graphs
-import numpy as np
-import pyqtgraph as pg
-from queue import Queue
 
 # Hardware control files
 from hw_adc_pressure import pressure_gauge
@@ -419,19 +419,29 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
 
         # Creates the error_window instance
         self.error_window = StartupErrorWindow()
-        
+
+        # Reads the configuration file and create the corresponding variables
+        self.conf = configparser.ConfigParser()
+        self.conf.read('config_file.conf')
+        print(self.conf['VCV'].getfloat('volume_inc'))
+
         # Buttons
         # VCV tab
         self.VCV_start_btn.clicked.connect(lambda: self.modes(1))
         self.VCV_stop_btn.clicked.connect(lambda: self.modes(0))
-        self.VCV_volume_plus.clicked.connect(lambda: self.change_value(self.VCV_volume_spb, 5))
-        self.VCV_volume_minus.clicked.connect(lambda: self.change_value(self.VCV_volume_spb, -5))
+        self.VCV_volume_plus.clicked.connect(
+            lambda: self.change_value(self.VCV_volume_spb, self.conf['VCV'].getfloat('volume_inc')))
+        self.VCV_volume_minus.clicked.connect(
+            lambda: self.change_value(self.VCV_volume_spb, 
+                                      -1 * self.conf['VCV'].getfloat('volume_inc')))
         self.VCV_frequency_plus.clicked.connect(
             lambda: self.change_value(self.VCV_frequency_spb, 1))
         self.VCV_frequency_minus.clicked.connect(
             lambda: self.change_value(self.VCV_frequency_spb, -1))
-        self.VCV_flow_plus.clicked.connect(lambda: self.change_value(self.VCV_flow_spb, 1))
-        self.VCV_flow_minus.clicked.connect(lambda: self.change_value(self.VCV_flow_spb, -1))
+        self.VCV_flow_plus.clicked.connect(
+            lambda: self.change_value(self.VCV_flow_spb, 1))
+        self.VCV_flow_minus.clicked.connect(
+            lambda: self.change_value(self.VCV_flow_spb, -1))
         self.VCV_inhale_pause_plus.clicked.connect(
             lambda: self.change_value(self.VCV_inhale_pause_spb, 0.1))
         self.VCV_inhale_pause_minus.clicked.connect(
@@ -439,9 +449,12 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.VCV_inhale_pause_btn.clicked.connect(self.inhale_pause_control)
         
         # PCV tab
-        self.PCV_start_btn.clicked.connect(lambda: self.modes(2))
-        self.PCV_stop_btn.clicked.connect(lambda: self.modes(0))
-        self.PCV_pressure_plus.clicked.connect(lambda: self.change_value(self.PCV_pressure_spb, 1))
+        self.PCV_start_btn.clicked.connect(
+            lambda: self.modes(2))
+        self.PCV_stop_btn.clicked.connect(
+            lambda: self.modes(0))
+        self.PCV_pressure_plus.clicked.connect(
+            lambda: self.change_value(self.PCV_pressure_spb, 1))
         self.PCV_pressure_minus.clicked.connect(
             lambda: self.change_value(self.PCV_pressure_spb, -1))
         self.PCV_frequency_plus.clicked.connect(
@@ -463,9 +476,12 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.PCV_inhale_pause_btn.clicked.connect(self.inhale_pause_control)
         
         # PSV tab
-        self.PSV_start_btn.clicked.connect(lambda: self.modes(3))
-        self.PSV_stop_btn.clicked.connect(lambda: self.modes(0))
-        self.PSV_pressure_plus.clicked.connect(lambda: self.change_value(self.PSV_pressure_spb, 1))
+        self.PSV_start_btn.clicked.connect(
+            lambda: self.modes(3))
+        self.PSV_stop_btn.clicked.connect(
+            lambda: self.modes(0))
+        self.PSV_pressure_plus.clicked.connect(
+            lambda: self.change_value(self.PSV_pressure_spb, 1))
         self.PSV_pressure_minus.clicked.connect(
             lambda: self.change_value(self.PSV_pressure_spb, -1))
         self.PSV_rise_time_plus.clicked.connect(
@@ -675,12 +691,12 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
             # Update the graph data with data only within the chosen time_range
             now = time.time()
             idxs_tr = np.where(now - self.prs_data[0, :] < 
-                                self.time_range[1] - self.time_range[0])[0]
+                               self.time_range[1] - self.time_range[0])[0]
             self.prs_graph.setData(self.prs_data[0, idxs_tr] - now, self.prs_data[1, idxs_tr])
             std_dev = np.std(self.prs_data[1, idxs_tr])
             # Updates the graph title
             self.prs_pw.setTitle(f"Pressão: {self.prs_data[1, 0]:.1f} cmH2O +- {std_dev:.2f}",
-                                **self.ttl_style)
+                                 **self.ttl_style)
             # Updates the data that is given to the piston function
             self.worker_piston.prs_data = self.prs_data
             if profile_time == True:
@@ -725,7 +741,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
             self.vol_data = np.roll(self.vol_data, 1)
             self.vol_data[:, 0] = (self.flw_data[0, 0], volume)
             idxs_tr = np.where(now - self.vol_data[0, :] < 
-                                self.time_range[1] - self.time_range[0])[0]
+                               self.time_range[1] - self.time_range[0])[0]
             std_dev = np.std(self.vol_data[1, idxs_tr])
             self.vol_pw.setTitle(f"Volume: {volume:.0f} ml +- {std_dev:.1f}",
                                  **self.ttl_style)
@@ -747,14 +763,14 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         N = 20
         if self.run_counter % N == 0:
             self.vol_pw.setYRange(np.min(self.vol_data[1, idxs_tr]),
-                                np.max(self.vol_data[1, idxs_tr]),
-                                self.padding)
+                                  np.max(self.vol_data[1, idxs_tr]),
+                                  self.padding)
             self.prs_pw.setYRange(np.min(self.prs_data[1, idxs_tr]),
-                                np.max(self.prs_data[1, idxs_tr]),
-                                self.padding)
+                                  np.max(self.prs_data[1, idxs_tr]),
+                                  self.padding)
             self.flw_pw.setYRange(np.min(self.flw_data[1, idxs_tr]),
-                                np.max(self.flw_data[1, idxs_tr]),
-                                self.padding)
+                                  np.max(self.flw_data[1, idxs_tr]),
+                                  self.padding)
             self.run_counter = 0
         self.run_counter += 1
 
