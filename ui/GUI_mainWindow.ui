@@ -222,6 +222,12 @@
                 </property>
                 <item>
                  <widget class="QPushButton" name="VCV_frequency_minus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                    <horstretch>1</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>50</width>
@@ -230,7 +236,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>50</width>
+                    <width>100</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -253,9 +259,15 @@
                  <widget class="QDoubleSpinBox" name="VCV_frequency_spb">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
+                    <horstretch>1</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
                   </property>
                   <property name="maximumSize">
                    <size>
@@ -288,6 +300,12 @@
                 </item>
                 <item>
                  <widget class="QPushButton" name="VCV_frequency_plus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                    <horstretch>1</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>50</width>
@@ -296,7 +314,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>50</width>
+                    <width>100</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -354,6 +372,12 @@
                 </property>
                 <item>
                  <widget class="QPushButton" name="VCV_flow_minus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                    <horstretch>1</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>50</width>
@@ -362,7 +386,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>50</width>
+                    <width>100</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -385,9 +409,15 @@
                  <widget class="QDoubleSpinBox" name="VCV_flow_spb">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
+                    <horstretch>1</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
                   </property>
                   <property name="maximumSize">
                    <size>
@@ -417,6 +447,12 @@
                 </item>
                 <item>
                  <widget class="QPushButton" name="VCV_flow_plus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                    <horstretch>1</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>50</width>
@@ -425,7 +461,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>50</width>
+                    <width>100</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -483,6 +519,12 @@
                 </property>
                 <item>
                  <widget class="QPushButton" name="VCV_volume_minus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                    <horstretch>1</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>50</width>
@@ -491,7 +533,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>50</width>
+                    <width>100</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -514,9 +556,15 @@
                  <widget class="QDoubleSpinBox" name="VCV_volume_spb">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
+                    <horstretch>1</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
                   </property>
                   <property name="maximumSize">
                    <size>
@@ -546,6 +594,12 @@
                 </item>
                 <item>
                  <widget class="QPushButton" name="VCV_volume_plus">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                    <horstretch>1</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>50</width>
@@ -554,7 +608,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>50</width>
+                    <width>100</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -665,13 +719,13 @@
                  <widget class="QPushButton" name="VCV_inhale_pause_minus">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
+                    <horstretch>1</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>50</width>
+                    <width>100</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -694,9 +748,15 @@
                  <widget class="QDoubleSpinBox" name="VCV_inhale_pause_spb">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
+                    <horstretch>1</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
                   </property>
                   <property name="maximumSize">
                    <size>
@@ -731,13 +791,13 @@
                  <widget class="QPushButton" name="VCV_inhale_pause_plus">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
+                    <horstretch>1</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>50</width>
+                    <width>100</width>
                     <height>50</height>
                    </size>
                   </property>
