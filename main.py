@@ -103,16 +103,15 @@ class ControlPiston(QtCore.QObject):
         """
         # Initializing the cycle data (cd) dictionary
         self.cd["started_up"] = False
-        self.cd["peak_pressure"] = "0 cmH2O"
-        self.cd["tidal_volume"] = "0 ml"
-        self.cd["inhale_time"] = "0 s"
-        self.cd["exhale_time"] = "0 s"
-        self.cd["exhale_time"] = "0 s"
-        self.cd["IE_ratio"] = "1 : 1"
+        self.cd["peak_pressure"] = 0
+        self.cd["tidal_volume"] = 0
+        self.cd["inhale_time"] = 0
+        self.cd["exhale_time"] = 0
+        self.cd["IE_ratio"] = 1
         to = 2  # Timeout
         startup_cycles = 0
         limit = 20
-        while self.pst_pos == None:
+        while self.pst_pos != "top":
             if self.pst_dir == 1:
                 self.pst_pos = self.piston.piston_up(to)
                 self.pst_dir = 0
@@ -152,7 +151,8 @@ class ControlPiston(QtCore.QObject):
         last_cycle_dur = 0.1
         inhale_time = 1
         exhale_time = 1
-
+        PCV_ratio = 1
+        PSV_ratio = 1
         # 5% margin of error for the target values
         margin = 0.05
 
@@ -176,8 +176,8 @@ class ControlPiston(QtCore.QObject):
                 peak_vol = np.max(self.vol_data[1, idxs_last_cycle])
             except:
                 peak_vol = 0
-            self.cd["peak_pressure"] = f"{peak_prs:.1f} cmH2O"
-            self.cd["tidal_volume"] = f"{peak_vol:.1f} ml"
+            self.cd["peak_pressure"] = peak_prs
+            self.cd["tidal_volume"] = peak_vol
 
             if self.mode == 1:  # 'VCV'
                 """
@@ -187,8 +187,12 @@ class ControlPiston(QtCore.QObject):
                 """
                 # Reading the relevant values from the interface
                 tgt_per = 60. / self.gui["VCV_frequency_spb"].value()
-                max_flw = self.gui["VCV_flow_spb"].value()
-                tgt_vol = self.gui["VCV_volume_spb"].value()
+                vol_max = self.gui["VCV_volume_max_spb"].value()
+                vol_min = self.gui["VCV_volume_min_spb"].value()
+                # The target volume is the mean between maximum and minimum
+                tgt_vol = (vol_max + vol_min) / 2.0 
+                # There should be a limit to the pressure
+                prs_max = self.gui["VCV_pressure_max_spb"].value()
                 self.pause_duration = self.gui["VCV_inhale_pause_spb"].value()
 
                 # On the first cycle, use standard values
@@ -197,31 +201,21 @@ class ControlPiston(QtCore.QObject):
                     first_cycle = False
                     # Defines how long each cycle takes, enabling the volume control
                     t_move_up = tgt_per - t_move_down
-                    continue  # skips the rest of the loop on the first cycle
-                # Calculate the peak volume and flow for the last cycle
-                try:
-                    peak_flw = np.max(self.flw_data[1, idxs_last_cycle])
-                except:
-                    peak_flw = 0
-                print(f"Peak flow: {peak_flw:.1f}")
+                    continue  # skips the rest of the for loop on the first cycle
+                # Calculate the peak volume and pressure for the last cycle
                 try:
                     peak_vol = np.max(self.vol_data[1, idxs_last_cycle])
                 except:
                     peak_vol = 0
                 print(f"Peak volume: {peak_vol:.1f}")
 
-                if peak_flw > max_flw:
-                    print("Flow is too high, close valve")
                     
-                if peak_vol > tgt_vol * (1.0 + margin):
-                    if peak_vol == 0:  # Avoiding a division by zero
-                        t_move_down  = t_move_down * (1.0 - margin)
-                    else:  # Proportional reduction
-                        t_move_down = t_move_down * tgt_vol / peak_vol
+                if peak_vol > vol_max:
+                    t_move_down = t_move_down * tgt_vol / peak_vol
                     print(f"Volume is too high, reducing t_move_down to {t_move_down:.2f}")
-                if peak_vol < tgt_vol * (1.0 - margin):
+                if peak_vol < vol_min:
                     if peak_vol == 0:  # Avoiding a division by zero
-                        new_t_move_down  = t_move_down * (1.0 + margin)
+                        new_t_move_down = t_move_down * (1.0 + margin)
                     else:  # Proportional increase
                         new_t_move_down = t_move_down * tgt_vol / peak_vol
                     if new_t_move_down > tgt_per * 0.5:
@@ -236,6 +230,7 @@ class ControlPiston(QtCore.QObject):
                 t_move_up = tgt_per - t_move_down
                 t_wait_up = 0
                 t_wait_down = 0
+               # self.pst_dir = 0
 
             elif self.mode == 2:  # 'PCV'
                 """
@@ -248,25 +243,32 @@ class ControlPiston(QtCore.QObject):
                 tgt_per = 60. / self.gui["PCV_frequency_spb"].value()
                 # Reading the relevant values from the interface
                 tgt_prs = self.gui["PCV_pressure_spb"].value()
-                t_move_down = self.gui["PCV_rise_time_spb"].value()
-                t_wait_down = self.gui["PCV_inhale_time_spb"].value()
+                #t_move_down = self.gui["PCV_rise_time_spb"].value()
+                inhale_time = self.gui["PCV_inhale_time_spb"].value()
+                vol_max = self.gui["PCV_volume_max_spb"].value()
                 self.pause_duration = self.gui["PCV_inhale_pause_spb"].value()
             
-                # Defines how long each cycle takes. This is the main method of controlling the cycle in 
-                # this mode.
-                t_move_up = tgt_per - t_move_down - t_wait_down
-                    
-                # Calculate the peak pressure during the last cycle
+                # Calculate the peak pressure during the last cycle and adjust how long the piston
+                # goes down or stays down
                 try:
                     peak_prs = np.max(self.prs_data[1, idxs_last_cycle])
                 except:
                     peak_prs = 0
                 if peak_prs > tgt_prs * (1 + margin):
-                    print(f"Peak pressure {peak_prs:.1f} cmH2O is too high, close valve")
+                    print(f"Peak pressure {peak_prs:.1f} cmH2O is too high")
+                    PCV_ratio = PCV_ratio * (1 + margin)
                 elif peak_prs < tgt_prs * (1 - margin):
                     print(f"Peak pressure {peak_prs:.1f} cmH2O is too low, open valve")
+                    PCV_ratio = PCV_ratio * (1 - margin)
                 else:
-                    print(f"Peak pressure is within 10% of {tgt_prs:.1f}: {peak_prs:.1f} cmH2O")
+                    print(f"Peak pressure is close to {tgt_prs:.1f}: {peak_prs:.1f} cmH2O")
+
+                # Defines how long each cycle takes. This is the main method of controlling the
+                # cycle in this mode.
+                t_move_down = inhale_time / (1 + PCV_ratio)
+                t_wait_down = inhale_time / (1 + 1 / PCV_ratio)
+                t_move_up = tgt_per - t_move_down - t_wait_down
+                #self.pst_dir = 0
 
             elif self.mode == 3:  # 'PSV'
                 """
@@ -274,10 +276,29 @@ class ControlPiston(QtCore.QObject):
                 cycle with the pressure limited 
                 """
                 tgt_prs = self.gui["PSV_pressure_spb"].value()
-                t_move_down = self.gui["PSV_rise_time_spb"].value()
+                threshold = self.gui["PSV_sensitivity_spb"].value()
                 self.pause_duration = self.gui["PSV_inhale_pause_spb"].value()
-                 
-                t_move_up = t_move_down
+                
+                # Calculate the peak pressure during the last cycle and adjust how long the piston
+                # goes down or stays down
+                try:
+                    peak_prs = np.max(self.prs_data[1, idxs_last_cycle])
+                except:
+                    peak_prs = 0
+                if peak_prs > tgt_prs * (1 + margin):
+                    print(f"Peak pressure {peak_prs:.1f} cmH2O is too high")
+                    PCV_ratio = PSV_ratio * (1 + margin)
+                elif peak_prs < tgt_prs * (1 - margin):
+                    print(f"Peak pressure {peak_prs:.1f} cmH2O is too low, open valve")
+                    PCV_ratio = PSV_ratio * (1 - margin)
+                else:
+                    print(f"Peak pressure is close to {tgt_prs:.1f}: {peak_prs:.1f} cmH2O")
+
+                # Defines how long each cycle takes. This is the main method of controlling the
+                # cycle in this mode.
+                t_move_down = 1 / (1 + PCV_ratio)
+                t_wait_down = 1 / (1 + 1 / PCV_ratio)
+                t_move_up = tgt_per - t_move_down - t_wait_down
 
                 sens_range = 0.2
                 ids_prs = np.where(time.time() - self.prs_data[0, :] < sens_range)[0]
@@ -286,7 +307,7 @@ class ControlPiston(QtCore.QObject):
                 except:
                     prs_trigger = np.inf
                 # Negative pressure means patient is trying to breathe
-                threshold = -0.5  # cmH2O
+                # threshold = -0.5  # cmH2O
                 if triggered_last_cycle:
                     triggered_last_cycle = False
                     self.pst_dir = 1
@@ -349,10 +370,10 @@ class ControlPiston(QtCore.QObject):
 
             # Calculating the I:E ratio
             ratio = exhale_time / inhale_time
-            self.cd["IE_ratio"] = f"1 : {ratio:.1f}"
+            self.cd["IE_ratio"] = ratio
             # Saving the data for the GUI update
-            self.cd["inhale_time"] = f"{inhale_time:.1f} s"
-            self.cd["exhale_time"] = f"{exhale_time:.1f} s"
+            self.cd["inhale_time"] = inhale_time
+            self.cd["exhale_time"] = exhale_time
             self.signal_cycle_data.emit(self.cd)
 
 class InterfaceControl(QtCore.QObject):
@@ -423,76 +444,9 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         # Reads the configuration file and create the corresponding variables
         self.conf = configparser.ConfigParser()
         self.conf.read('config_file.conf')
-        print(self.conf['VCV'].getfloat('volume_inc'))
 
-        # Buttons
-        # VCV tab
-        self.VCV_start_btn.clicked.connect(lambda: self.modes(1))
-        self.VCV_stop_btn.clicked.connect(lambda: self.modes(0))
-        self.VCV_volume_plus.clicked.connect(
-            lambda: self.change_value(self.VCV_volume_spb, self.conf['VCV'].getfloat('volume_inc')))
-        self.VCV_volume_minus.clicked.connect(
-            lambda: self.change_value(self.VCV_volume_spb, 
-                                      -1 * self.conf['VCV'].getfloat('volume_inc')))
-        self.VCV_frequency_plus.clicked.connect(
-            lambda: self.change_value(self.VCV_frequency_spb, 1))
-        self.VCV_frequency_minus.clicked.connect(
-            lambda: self.change_value(self.VCV_frequency_spb, -1))
-        self.VCV_flow_plus.clicked.connect(
-            lambda: self.change_value(self.VCV_flow_spb, 1))
-        self.VCV_flow_minus.clicked.connect(
-            lambda: self.change_value(self.VCV_flow_spb, -1))
-        self.VCV_inhale_pause_plus.clicked.connect(
-            lambda: self.change_value(self.VCV_inhale_pause_spb, 0.1))
-        self.VCV_inhale_pause_minus.clicked.connect(
-            lambda: self.change_value(self.VCV_inhale_pause_spb, -0.1))
-        self.VCV_inhale_pause_btn.clicked.connect(self.inhale_pause_control)
-        
-        # PCV tab
-        self.PCV_start_btn.clicked.connect(
-            lambda: self.modes(2))
-        self.PCV_stop_btn.clicked.connect(
-            lambda: self.modes(0))
-        self.PCV_pressure_plus.clicked.connect(
-            lambda: self.change_value(self.PCV_pressure_spb, 1))
-        self.PCV_pressure_minus.clicked.connect(
-            lambda: self.change_value(self.PCV_pressure_spb, -1))
-        self.PCV_frequency_plus.clicked.connect(
-            lambda: self.change_value(self.PCV_frequency_spb, 1))
-        self.PCV_frequency_minus.clicked.connect(
-            lambda: self.change_value(self.PCV_frequency_spb, -1))
-        self.PCV_inhale_time_plus.clicked.connect(
-            lambda: self.change_value(self.PCV_inhale_time_spb, 0.1))
-        self.PCV_inhale_time_minus.clicked.connect(
-            lambda: self.change_value(self.PCV_inhale_time_spb, -0.1))
-        self.PCV_rise_time_plus.clicked.connect(
-            lambda: self.change_value(self.PCV_rise_time_spb, 0.1))
-        self.PCV_rise_time_minus.clicked.connect(
-            lambda: self.change_value(self.PCV_rise_time_spb, -0.1))
-        self.PCV_inhale_pause_plus.clicked.connect(
-            lambda: self.change_value(self.PCV_inhale_pause_spb, 0.1))
-        self.PCV_inhale_pause_minus.clicked.connect(
-            lambda: self.change_value(self.PCV_inhale_pause_spb, -0.1))
-        self.PCV_inhale_pause_btn.clicked.connect(self.inhale_pause_control)
-        
-        # PSV tab
-        self.PSV_start_btn.clicked.connect(
-            lambda: self.modes(3))
-        self.PSV_stop_btn.clicked.connect(
-            lambda: self.modes(0))
-        self.PSV_pressure_plus.clicked.connect(
-            lambda: self.change_value(self.PSV_pressure_spb, 1))
-        self.PSV_pressure_minus.clicked.connect(
-            lambda: self.change_value(self.PSV_pressure_spb, -1))
-        self.PSV_rise_time_plus.clicked.connect(
-            lambda: self.change_value(self.PSV_rise_time_spb, 0.1))
-        self.PSV_rise_time_minus.clicked.connect(
-            lambda: self.change_value(self.PSV_rise_time_spb, -0.1))
-        self.PSV_inhale_pause_plus.clicked.connect(
-            lambda: self.change_value(self.PSV_inhale_pause_spb, 0.1))
-        self.PSV_inhale_pause_minus.clicked.connect(
-            lambda: self.change_value(self.PSV_inhale_pause_spb, -0.1))
-        self.PSV_inhale_pause_btn.clicked.connect(self.inhale_pause_control)
+        # Creates the connections between each interface button and the correspondent functions
+        self.connect_buttons()
 
         # Configuration of the default values on the interface
         self.start_interface()
@@ -507,6 +461,142 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         gui_update_period = 1000 / gui_update_frequency  # period in ms
         self.timer.start(gui_update_period)
         self.timer.timeout.connect(self.update_graphs)
+
+    def connect_buttons(self):
+        # Buttons
+        # VCV tab
+        self.VCV_start_btn.clicked.connect(lambda: self.modes(1))
+        self.VCV_stop_btn.clicked.connect(lambda: self.modes(0))
+        self.VCV_frequency_plus_btn.clicked.connect(
+            lambda: self.change_value(self.VCV_frequency_spb, "+"))
+        self.VCV_frequency_minus_btn.clicked.connect(
+            lambda: self.change_value(self.VCV_frequency_spb, "-"))
+        self.VCV_pressure_max_plus_btn.clicked.connect(
+            lambda: self.change_value(self.VCV_pressure_max_spb, "+"))
+        self.VCV_pressure_max_minus_btn.clicked.connect(
+            lambda: self.change_value(self.VCV_pressure_max_spb, "-"))
+        self.VCV_volume_max_plus_btn.clicked.connect(
+            lambda: self.change_value(self.VCV_volume_max_spb, "+"))
+        self.VCV_volume_max_minus_btn.clicked.connect(
+            lambda: self.change_value(self.VCV_volume_max_spb, "-"))
+        self.VCV_volume_min_plus_btn.clicked.connect(
+            lambda: self.change_value(self.VCV_volume_min_spb, "+"))
+        self.VCV_volume_min_minus_btn.clicked.connect(
+            lambda: self.change_value(self.VCV_volume_min_spb, "-"))
+        self.VCV_inhale_pause_plus_btn.clicked.connect(
+            lambda: self.change_value(self.VCV_inhale_pause_spb, "+"))
+        self.VCV_inhale_pause_minus_btn.clicked.connect(
+            lambda: self.change_value(self.VCV_inhale_pause_spb, "-"))
+        self.VCV_inhale_pause_btn.clicked.connect(self.inhale_pause_control)
+        
+        # PCV tab
+        self.PCV_start_btn.clicked.connect(lambda: self.modes(2))
+        self.PCV_stop_btn.clicked.connect(lambda: self.modes(0))
+        self.PCV_frequency_plus_btn.clicked.connect(
+            lambda: self.change_value(self.PCV_frequency_spb, "+"))
+        self.PCV_frequency_minus_btn.clicked.connect(
+            lambda: self.change_value(self.PCV_frequency_spb, "-"))
+        self.PCV_pressure_plus_btn.clicked.connect(
+            lambda: self.change_value(self.PCV_pressure_spb, "+"))
+        self.PCV_pressure_minus_btn.clicked.connect(
+            lambda: self.change_value(self.PCV_pressure_spb, "-"))
+        self.PCV_inhale_time_plus_btn.clicked.connect(
+            lambda: self.change_value(self.PCV_inhale_time_spb, "+"))
+        self.PCV_inhale_time_minus_btn.clicked.connect(
+            lambda: self.change_value(self.PCV_inhale_time_spb, "-"))
+        self.PCV_volume_max_plus_btn.clicked.connect(
+            lambda: self.change_value(self.PCV_volume_max_spb, "+"))
+        self.PCV_volume_max_minus_btn.clicked.connect(
+            lambda: self.change_value(self.PCV_volume_max_spb, "-"))
+        self.PCV_inhale_pause_plus_btn.clicked.connect(
+            lambda: self.change_value(self.PCV_inhale_pause_spb, "+"))
+        self.PCV_inhale_pause_minus_btn.clicked.connect(
+            lambda: self.change_value(self.PCV_inhale_pause_spb, "-"))
+        self.PCV_inhale_pause_btn.clicked.connect(self.inhale_pause_control)
+        
+        # PSV tab
+        self.PSV_start_btn.clicked.connect(lambda: self.modes(3))
+        self.PSV_stop_btn.clicked.connect(lambda: self.modes(0))
+        self.PSV_pressure_plus_btn.clicked.connect(
+            lambda: self.change_value(self.PSV_pressure_spb, "+"))
+        self.PSV_pressure_minus_btn.clicked.connect(
+            lambda: self.change_value(self.PSV_pressure_spb, "-"))
+        self.PSV_sensitivity_plus_btn.clicked.connect(
+            lambda: self.change_value(self.PSV_sensitivity_spb, "+"))
+        self.PSV_sensitivity_minus_btn.clicked.connect(
+            lambda: self.change_value(self.PSV_sensitivity_spb, "-"))
+        self.PSV_inhale_pause_plus_btn.clicked.connect(
+            lambda: self.change_value(self.PSV_inhale_pause_spb, "+"))
+        self.PSV_inhale_pause_minus_btn.clicked.connect(
+            lambda: self.change_value(self.PSV_inhale_pause_spb, "-"))
+        self.PSV_inhale_pause_btn.clicked.connect(self.inhale_pause_control)
+
+        # Alarms tab
+        self.al_PEEP_min_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_PEEP_min_spb, "+"))
+        self.al_PEEP_min_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_PEEP_min_spb, "-"))
+        self.al_apnea_min_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_apnea_min_spb, "+"))
+        self.al_apnea_min_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_apnea_min_spb, "-"))
+        self.al_flow_min_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_flow_min_spb, "+"))
+        self.al_flow_min_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_flow_min_spb, "-"))
+        self.al_frequency_min_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_frequency_min_spb, "+"))
+        self.al_frequency_min_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_frequency_min_spb, "-"))
+        self.al_paw_min_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_paw_min_spb, "+"))
+        self.al_paw_min_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_paw_min_spb, "-"))
+        self.al_plateau_pressure_min_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_plateau_pressure_min_spb, "+"))
+        self.al_plateau_pressure_min_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_plateau_pressure_min_spb, "-"))
+        self.al_tidal_volume_min_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_tidal_volume_min_spb, "+"))
+        self.al_tidal_volume_min_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_tidal_volume_min_spb, "-"))
+        self.al_volume_minute_min_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_volume_minute_min_spb, "+"))
+        self.al_volume_minute_min_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_volume_minute_min_spb, "-"))
+        self.al_PEEP_max_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_PEEP_max_spb, "+"))
+        self.al_PEEP_max_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_PEEP_max_spb, "-"))
+        self.al_apnea_max_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_apnea_max_spb, "+"))
+        self.al_apnea_max_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_apnea_max_spb, "-"))
+        self.al_flow_max_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_flow_max_spb, "+"))
+        self.al_flow_max_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_flow_max_spb, "-"))
+        self.al_frequency_max_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_frequency_max_spb, "+"))
+        self.al_frequency_max_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_frequency_max_spb, "-"))
+        self.al_paw_max_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_paw_max_spb, "+"))
+        self.al_paw_max_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_paw_max_spb, "-"))
+        self.al_plateau_pressure_max_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_plateau_pressure_max_spb, "+"))
+        self.al_plateau_pressure_max_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_plateau_pressure_max_spb, "-"))
+        self.al_tidal_volume_max_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_tidal_volume_max_spb, "+"))
+        self.al_tidal_volume_max_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_tidal_volume_max_spb, "-"))
+        self.al_volume_minute_max_plus_btn.clicked.connect(
+            lambda: self.change_value(self.al_volume_minute_max_spb, "+"))
+        self.al_volume_minute_max_minus_btn.clicked.connect(
+            lambda: self.change_value(self.al_volume_minute_max_spb, "-"))
+
 
     def create_graphs(self):
         # Definitions to create the graphs
@@ -597,17 +687,18 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         Must use .self so that the garbage collection doesn't kill the threads
         """
         # Dictionary with the interface items that will be passed to the functions
-        gui_items = {"VCV_flow_spb":self.VCV_flow_spb,
-                     "VCV_frequency_spb":self.VCV_frequency_spb,
+        gui_items = {"VCV_frequency_spb":self.VCV_frequency_spb,
+                     "VCV_pressure_max_spb":self.VCV_pressure_max_spb,
+                     "VCV_volume_max_spb":self.VCV_volume_max_spb,
+                     "VCV_volume_min_spb":self.VCV_volume_min_spb,
                      "VCV_inhale_pause_spb":self.VCV_inhale_pause_spb,
-                     "VCV_volume_spb":self.VCV_volume_spb,
                      "PCV_frequency_spb":self.PCV_frequency_spb,
-                     "PCV_rise_time_spb":self.PCV_rise_time_spb,
                      "PCV_pressure_spb":self.PCV_pressure_spb,
                      "PCV_inhale_time_spb":self.PCV_inhale_time_spb,
+                     "PCV_volume_max_spb":self.PCV_volume_max_spb,
                      "PCV_inhale_pause_spb":self.PCV_inhale_pause_spb,
                      "PSV_pressure_spb":self.PSV_pressure_spb,
-                     "PSV_rise_time_spb":self.PSV_rise_time_spb,
+                     "PSV_sensitivity_spb":self.PSV_sensitivity_spb,
                      "PSV_inhale_pause_spb":self.PSV_inhale_pause_spb,
                      "VCV_start_btn": self.VCV_start_btn,
                      "PCV_start_btn": self.PCV_start_btn,
@@ -783,40 +874,54 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         up
         """
         # VCV Tab
-        self.VCV_volume_spb.setValue(300)
-        self.VCV_frequency_spb.setValue(12)
-        self.VCV_flow_spb.setValue(30)
-        self.VCV_inhale_pause_spb.setValue(1)
+        self.VCV_frequency_spb.setValue(self.conf["VCV"].getfloat("frequency"))
+        self.VCV_pressure_max_spb.setValue(self.conf["VCV"].getfloat("pressure_max"))
+        self.VCV_volume_max_spb.setValue(self.conf["VCV"].getfloat("volume_max"))
+        self.VCV_volume_min_spb.setValue(self.conf["VCV"].getfloat("volume_min"))
+        self.VCV_inhale_pause_spb.setValue(self.conf["VCV"].getfloat("inhale_pause"))
         self.VCV_stop_btn.setEnabled(False)
         # PCV Tab
-        self.PCV_pressure_spb.setValue(20)
-        self.PCV_frequency_spb.setValue(12)
-        self.PCV_inhale_time_spb.setValue(2)
-        self.PCV_rise_time_spb.setValue(1)
-        self.PCV_inhale_pause_spb.setValue(1)
+        self.PCV_frequency_spb.setValue(self.conf["PCV"].getfloat("frequency"))
+        self.PCV_pressure_spb.setValue(self.conf["PCV"].getfloat("pressure"))
+        self.PCV_inhale_time_spb.setValue(self.conf["PCV"].getfloat("inhale_time"))
+        self.PCV_volume_max_spb.setValue(self.conf["PCV"].getfloat("volume_max"))
+        self.PCV_inhale_pause_spb.setValue(self.conf["PCV"].getfloat("inhale_pause"))
         self.PCV_stop_btn.setEnabled(False)
         # PSV Tab
-        self.PSV_pressure_spb.setValue(20)
-        self.PSV_rise_time_spb.setValue(2)
-        self.PSV_inhale_pause_spb.setValue(1)
+        self.PSV_pressure_spb.setValue(self.conf["PSV"].getfloat("pressure"))
+        self.PSV_sensitivity_spb.setValue(self.conf["PSV"].getfloat("sensitivity"))
+        self.PSV_inhale_time_spb.setValue(self.conf["PSV"].getfloat("inhale_time"))
+        self.PSV_inhale_pause_spb.setValue(self.conf["PSV"].getfloat("inhale_pause"))
         self.PSV_stop_btn.setEnabled(False)
         # Alarms Tab
-        self.al_tidal_volume_min_dSpinBox.setValue(0)
-        self.al_tidal_volume_max_dSpinBox.setValue(600)
-        self.al_volume_minute_min_dSpinBox.setValue(0)
-        self.al_volume_minute_max_dSpinBox.setValue(60)
-        self.al_flow_min_dSpinBox.setValue(0)
-        self.al_flow_max_dSpinBox.setValue(60)
-        self.al_paw_min_dSpinBox.setValue(0)
-        self.al_paw_max_dSpinBox.setValue(100)
-        self.al_plateau_pressure_min_dSpinBox.setValue(0)
-        self.al_plateau_pressure_max_dSpinBox.setValue(50)
-        self.al_PEEP_min_dSpinBox.setValue(0)
-        self.al_PEEP_max_dSpinBox.setValue(100)
-        self.al_frequency_min_dSpinBox.setValue(5)
-        self.al_frequency_max_dSpinBox.setValue(20)
-        self.al_apnea_min_dSpinBox.setValue(0)
-        self.al_apnea_max_dSpinBox.setValue(100)
+        self.al_tidal_volume_min_spb.setValue(self.conf["Alarms"].getfloat("tidal_volume_min"))
+        self.al_tidal_volume_max_spb.setValue(self.conf["Alarms"].getfloat("tidal_volume_max"))
+        self.al_tidal_volume_chkBox.setChecked(self.conf["Alarms"].getboolean("tidal_volume_on"))
+        self.al_volume_minute_min_spb.setValue(self.conf["Alarms"].getfloat("volume_minute_min"))
+        self.al_volume_minute_max_spb.setValue(self.conf["Alarms"].getfloat("volume_minute_max"))
+        self.al_volume_minute_chkBox.setChecked(self.conf["Alarms"].getboolean("volume_minute_on"))
+        self.al_flow_min_spb.setValue(self.conf["Alarms"].getfloat("flow_min"))
+        self.al_flow_max_spb.setValue(self.conf["Alarms"].getfloat("flow_max"))
+        self.al_flow_chkBox.setChecked(self.conf["Alarms"].getboolean("flow_on"))
+        self.al_paw_min_spb.setValue(self.conf["Alarms"].getfloat("paw_min"))
+        self.al_paw_max_spb.setValue(self.conf["Alarms"].getfloat("paw_max"))
+        self.al_paw_chkBox.setChecked(self.conf["Alarms"].getboolean("paw_on"))
+        self.al_plateau_pressure_min_spb.setValue(
+            self.conf["Alarms"].getfloat("plateau_pressure_min"))
+        self.al_plateau_pressure_max_spb.setValue(
+            self.conf["Alarms"].getfloat("plateau_pressure_max"))
+        self.al_plateau_pressure_chkBox.setChecked(
+            self.conf["Alarms"].getboolean("plateau_pressure_on"))
+        self.al_PEEP_min_spb.setValue(self.conf["Alarms"].getfloat("PEEP_min"))
+        self.al_PEEP_max_spb.setValue(self.conf["Alarms"].getfloat("PEEP_max"))
+        self.al_PEEP_chkBox.setChecked(self.conf["Alarms"].getboolean("PEEP_on"))
+        self.al_frequency_min_spb.setValue(self.conf["Alarms"].getfloat("frequency_min"))
+        self.al_frequency_max_spb.setValue(self.conf["Alarms"].getfloat("frequency_max"))
+        self.al_frequency_chkBox.setChecked(self.conf["Alarms"].getboolean("frequency_on"))
+        self.al_apnea_min_spb.setValue(self.conf["Alarms"].getfloat("apnea_min"))
+        self.al_apnea_max_spb.setValue(self.conf["Alarms"].getfloat("apnea_max"))
+        self.al_apnea_chkBox.setChecked(self.conf["Alarms"].getboolean("apnea_on"))
+
         # Always shown elements
         self.inhale_time_val.setText("0,0 s")
         self.exhale_time_val.setText("0,0 s")
@@ -845,22 +950,22 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
                        2:[self.PSV_pressure_spb,
                           self.PSV_rise_time_spb,
                           self.PSV_inhale_pause_spb],
-                       3:[self.al_tidal_volume_min_dSpinBox,
-                          self.al_tidal_volume_max_dSpinBox,
-                          self.al_volume_minute_min_dSpinBox,
-                          self.al_volume_minute_max_dSpinBox,
-                          self.al_flow_min_dSpinBox,
-                          self.al_flow_max_dSpinBox,
-                          self.al_paw_min_dSpinBox,
-                          self.al_paw_max_dSpinBox,
-                          self.al_plateau_pressure_min_dSpinBox,
-                          self.al_plateau_pressure_max_dSpinBox,
-                          self.al_PEEP_min_dSpinBox,
-                          self.al_PEEP_max_dSpinBox,
-                          self.al_frequency_min_dSpinBox,
-                          self.al_frequency_max_dSpinBox,
-                          self.al_apnea_min_dSpinBox,
-                          self.al_apnea_max_dSpinBox]}
+                       3:[self.al_tidal_volume_min_spb,
+                          self.al_tidal_volume_max_spb,
+                          self.al_volume_minute_min_spb,
+                          self.al_volume_minute_max_spb,
+                          self.al_flow_min_spb,
+                          self.al_flow_max_spb,
+                          self.al_paw_min_spb,
+                          self.al_paw_max_spb,
+                          self.al_plateau_pressure_min_spb,
+                          self.al_plateau_pressure_max_spb,
+                          self.al_PEEP_min_spb,
+                          self.al_PEEP_max_spb,
+                          self.al_frequency_min_spb,
+                          self.al_frequency_max_spb,
+                          self.al_apnea_min_spb,
+                          self.al_apnea_max_spb]}
         # By default will choose the first spinbox on the current tab.
         current_spb = tab_content[c_tab][1]
         # Going through the spinboxes of the current tab and checking whether they have the focus
@@ -870,9 +975,9 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
                 continue
 
         if action == "UP":
-            self.change_value(current_spb, 1)
+            self.change_value(current_spb, "+")
         elif action == "DOWN":
-            self.change_value(current_spb, -1)
+            self.change_value(current_spb, "-")
         elif action == "OK":
             # Put the next spinbox in focus
             nxt = tab_content[c_tab][(tab_content[c_tab].index(current_spb) + 1) % 
@@ -884,18 +989,60 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
                                      len(tab_content[c_tab])]
             nxt.setFocus()
         elif action == "CW":
-            self.change_value(current_spb, 1)
+            self.change_value(current_spb, "+")
         elif action == "CCW":
-            self.change_value(current_spb, -1)
+            self.change_value(current_spb, "-")
         else:
             print("I just don't get it man")
 
-    def change_value(self, spinbox, increment):
+    def change_value(self, spinbox, action):
         """
-        Function to update the value of the spinboxes when they're clicked or modified.
-        The button is connected to a lambda: change_value(button, + or - value)
+        Updates the value of the spinboxes when they're clicked or modified.
+        The button is connected to a lambda: change_value(spinbox, "+" or "-")
+        To get the increment from the conf file based on the spinbox name, it is necessary to parse:
+        "VCV_inhale_pause_spb" -> "VCV" is the tab name can be equal or not to the conf file section
+        "inhale_pause_spb" -> spinbox name, stripped of the "spb" is the value in the conf file
+        "inhale_pause_inc" -> the increment key in the conf file, after "inc" was appended.
+        Each spinbox may have a different increment value, easily changed in the conf file.
         """
-        spinbox.setValue(spinbox.value() + increment)
+        # Gets the name of the spinbox and finds from which tab it belongs
+        spb_name = spinbox.objectName()
+        # Parsing to get the index of the "_" separators from the beginning (tab)
+        tab_sep = spb_name.find("_") 
+        tab_code = spb_name[0:tab_sep]
+        # If the three first letters of the spinbox name correspond to the modes' name, the 
+        # section has the same name, therefore it is only necessary to copy. The alarms tab
+        # is different
+        # Depending on the section, it is necessary to remove a few characters from the end of the 
+        # string. Either remove "spb" or "min_spb" or "max_spb"
+        if tab_code in ["VCV", "PSV", "PCV"]:
+            conf_section = tab_code
+            remove_chars = 3
+        elif tab_code == "al":
+            conf_section = "Alarms"
+            remove_chars = 7
+        # It should never reach the "else", but still here it is, if something fails
+        else:
+            print("Tab code " + tab_code + " is not valid")
+            return
+        # Gets the "pure" name of the spb, to which "inc" will be appended in order to access it in
+        # the conf file
+        spb_no_suffix = spb_name[tab_sep+1:-remove_chars]
+        # gets the increment as a float number from the appropriate section and spinbox
+        increment = self.conf[conf_section].getfloat(spb_no_suffix + "inc")
+        # Sets the single step property of the spinbox to correspond to the increment
+        spinbox.setSingleStep(increment)
+        # Adjusts the precision based on the increment's order of magnitude
+        for i, limit in enumerate([1, 0.1, 0.01, 0.001, 0.0001, 0.00001]):
+            if increment < limit:
+                continue
+            spinbox.setDecimals(i)
+            break
+        # Depending on the desired action, increases or deccreases the current spinbox value
+        if action == "-":
+            spinbox.setValue(spinbox.value() - increment)
+        else:
+            spinbox.setValue(spinbox.value() + increment)
 
     def modes(self, mode):
         """
@@ -949,11 +1096,11 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         Receives information about the last cycle in the form of a dict and updates the GUI based on
         that.
         """
-        self.inhale_time_val.setText(cd["inhale_time"])
-        self.exhale_time_val.setText(cd["exhale_time"])
-        self.IE_ratio_val.setText(cd["IE_ratio"])
-        self.peak_pressure_val.setText(cd["peak_pressure"])
-        self.tidal_volume_val.setText(cd["tidal_volume"])
+        self.inhale_time_val.setText(f"{cd['inhale_time']:.1f} s")
+        self.exhale_time_val.setText(f"{cd['exhale_time']:.1f} s")
+        self.IE_ratio_val.setText(f"1:{cd['IE_ratio']:.1f}")
+        self.peak_pressure_val.setText(f"{cd['peak_pressure']:.2f} cmH2O")
+        self.tidal_volume_val.setText(f"{cd['tidal_volume']:.0f} ml")
 
 class AboutWindow(QtWidgets.QMainWindow, Ui_Sobre):
     """Customization for Qt Designer created window"""
