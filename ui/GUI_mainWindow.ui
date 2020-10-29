@@ -155,7 +155,7 @@
            <enum>Qt::WheelFocus</enum>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="VCV_tab">
            <attribute name="title">
@@ -788,7 +788,7 @@
               <item row="5" column="1">
                <widget class="QPushButton" name="VCV_stop_btn">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Minimum">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -797,6 +797,12 @@
                  <size>
                   <width>170</width>
                   <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>260</width>
+                  <height>16777215</height>
                  </size>
                 </property>
                 <property name="font">
@@ -1632,6 +1638,12 @@
                   <height>50</height>
                  </size>
                 </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>260</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
                 <property name="font">
                  <font>
                   <family>Verdana</family>
@@ -1977,6 +1989,12 @@
                  <size>
                   <width>170</width>
                   <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>260</width>
+                  <height>16777215</height>
                  </size>
                 </property>
                 <property name="font">
@@ -4293,7 +4311,7 @@
                   <property name="minimumSize">
                    <size>
                     <width>120</width>
-                    <height>45</height>
+                    <height>40</height>
                    </size>
                   </property>
                   <property name="maximumSize">
