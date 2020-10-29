@@ -180,10 +180,10 @@
             <item>
              <layout class="QFormLayout" name="formLayout">
               <property name="horizontalSpacing">
-               <number>0</number>
+               <number>5</number>
               </property>
               <property name="verticalSpacing">
-               <number>0</number>
+               <number>1</number>
               </property>
               <item row="0" column="0">
                <widget class="QLabel" name="VCV_frequency_lbl">
@@ -262,6 +262,9 @@
                     <width>160</width>
                     <height>50</height>
                    </size>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
@@ -392,6 +395,9 @@
                     <height>50</height>
                    </size>
                   </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
@@ -517,6 +523,9 @@
                     <width>160</width>
                     <height>50</height>
                    </size>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
@@ -695,6 +704,9 @@
                     <height>50</height>
                    </size>
                   </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
@@ -827,10 +839,10 @@
             <item>
              <layout class="QFormLayout" name="formLayout_2">
               <property name="horizontalSpacing">
-               <number>0</number>
+               <number>5</number>
               </property>
               <property name="verticalSpacing">
-               <number>0</number>
+               <number>1</number>
               </property>
               <item row="0" column="0">
                <widget class="QLabel" name="PCV_frequency_lbl">
@@ -921,6 +933,9 @@
                     <width>160</width>
                     <height>50</height>
                    </size>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
@@ -1072,6 +1087,9 @@
                     <height>50</height>
                    </size>
                   </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
@@ -1218,6 +1236,9 @@
                     <width>160</width>
                     <height>50</height>
                    </size>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
@@ -1366,6 +1387,9 @@
                     <height>50</height>
                    </size>
                   </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
@@ -1507,6 +1531,9 @@
                     <height>50</height>
                    </size>
                   </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
                   </property>
@@ -1645,10 +1672,10 @@
             <item>
              <layout class="QFormLayout" name="formLayout_4">
               <property name="horizontalSpacing">
-               <number>0</number>
+               <number>5</number>
               </property>
               <property name="verticalSpacing">
-               <number>0</number>
+               <number>1</number>
               </property>
               <item row="0" column="0">
                <widget class="QLabel" name="PSV_support_pressure_lbl">
@@ -1739,6 +1766,9 @@
                     <width>160</width>
                     <height>60</height>
                    </size>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
@@ -1847,6 +1877,9 @@
                     <width>160</width>
                     <height>60</height>
                    </size>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
@@ -2023,6 +2056,9 @@
                   </property>
                   <property name="styleSheet">
                    <string notr="true"/>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
                   </property>
                   <property name="buttonSymbols">
                    <enum>QAbstractSpinBox::NoButtons</enum>
@@ -2269,6 +2305,9 @@
             </property>
             <item>
              <layout class="QGridLayout" name="gridLayout_2">
+              <property name="horizontalSpacing">
+               <number>5</number>
+              </property>
               <property name="verticalSpacing">
                <number>0</number>
               </property>
@@ -2387,7 +2426,7 @@
                </widget>
               </item>
               <item row="5" column="3">
-               <widget class="QDoubleSpinBox" name="al_plateau_pressure_max_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_plateau_pressure_max_spb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
@@ -2413,6 +2452,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2444,7 +2486,7 @@
                </widget>
               </item>
               <item row="7" column="1">
-               <widget class="QDoubleSpinBox" name="al_frequency_min_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_frequency_min_spb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
@@ -2470,6 +2512,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2486,7 +2531,7 @@
                </widget>
               </item>
               <item row="2" column="1">
-               <widget class="QDoubleSpinBox" name="al_volume_minute_min_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_volume_minute_min_spb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
@@ -2512,6 +2557,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2534,7 +2582,7 @@
                </widget>
               </item>
               <item row="3" column="3">
-               <widget class="QDoubleSpinBox" name="al_flow_max_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_flow_max_spb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
@@ -2560,6 +2608,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2576,7 +2627,7 @@
                </widget>
               </item>
               <item row="5" column="1">
-               <widget class="QDoubleSpinBox" name="al_plateau_pressure_min_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_plateau_pressure_min_spb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
@@ -2602,6 +2653,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2618,7 +2672,7 @@
                </widget>
               </item>
               <item row="8" column="3">
-               <widget class="QDoubleSpinBox" name="al_apnea_max_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_apnea_max_spb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
@@ -2644,6 +2698,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2660,7 +2717,7 @@
                </widget>
               </item>
               <item row="4" column="1">
-               <widget class="QDoubleSpinBox" name="al_paw_min_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_paw_min_spb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
@@ -2686,6 +2743,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2717,7 +2777,7 @@
                </widget>
               </item>
               <item row="7" column="3">
-               <widget class="QDoubleSpinBox" name="al_frequency_max_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_frequency_max_spb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
@@ -2743,6 +2803,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2774,7 +2837,7 @@
                </widget>
               </item>
               <item row="4" column="3">
-               <widget class="QDoubleSpinBox" name="al_paw_max_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_paw_max_spb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
@@ -2800,6 +2863,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2816,7 +2882,7 @@
                </widget>
               </item>
               <item row="6" column="3">
-               <widget class="QDoubleSpinBox" name="al_PEEP_max_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_PEEP_max_spb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
@@ -2842,6 +2908,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2858,7 +2927,7 @@
                </widget>
               </item>
               <item row="3" column="1">
-               <widget class="QDoubleSpinBox" name="al_flow_min_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_flow_min_spb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
@@ -2884,6 +2953,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -2900,7 +2972,7 @@
                </widget>
               </item>
               <item row="8" column="1">
-               <widget class="QDoubleSpinBox" name="al_apnea_min_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_apnea_min_spb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
@@ -2926,6 +2998,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -3020,7 +3095,7 @@
                </widget>
               </item>
               <item row="2" column="3">
-               <widget class="QDoubleSpinBox" name="al_volume_minute_max_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_volume_minute_max_spb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
@@ -3046,6 +3121,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -3149,7 +3227,7 @@
                </widget>
               </item>
               <item row="1" column="3">
-               <widget class="QDoubleSpinBox" name="al_tidal_volume_max_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_tidal_volume_max_spb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
@@ -3175,6 +3253,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -3197,7 +3278,7 @@
                </widget>
               </item>
               <item row="6" column="1">
-               <widget class="QDoubleSpinBox" name="al_PEEP_min_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_PEEP_min_spb">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>1</horstretch>
@@ -3223,6 +3304,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="buttonSymbols">
                  <enum>QAbstractSpinBox::PlusMinus</enum>
@@ -3305,7 +3389,7 @@
                </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QDoubleSpinBox" name="al_tidal_volume_min_dSpinBox">
+               <widget class="QDoubleSpinBox" name="al_tidal_volume_min_spb">
                 <property name="minimumSize">
                  <size>
                   <width>120</width>
@@ -3325,6 +3409,9 @@
                   <stylestrategy>PreferAntialias</stylestrategy>
                   <kerning>true</kerning>
                  </font>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                 <property name="suffix">
                  <string> ml</string>
@@ -3352,13 +3439,25 @@
         <item>
          <layout class="QFormLayout" name="formLayout_3">
           <property name="horizontalSpacing">
-           <number>0</number>
+           <number>5</number>
           </property>
           <property name="verticalSpacing">
-           <number>0</number>
+           <number>1</number>
           </property>
           <item row="0" column="0">
            <widget class="QLabel" name="inhale_time_lbl">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>250</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <family>Verdana</family>
@@ -3369,6 +3468,9 @@
             </property>
             <property name="text">
              <string>Tempo Inspiração</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -3391,10 +3493,25 @@
             <property name="text">
              <string>TextLabel</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
            </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="exhale_time_lbl">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>250</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <family>Verdana</family>
@@ -3406,10 +3523,25 @@
             <property name="text">
              <string>Tempo Expiração</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
            </widget>
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="IE_ratio_lbl">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>250</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <family>Verdana</family>
@@ -3420,6 +3552,9 @@
             </property>
             <property name="text">
              <string>Razão I:E</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -3436,10 +3571,25 @@
             <property name="text">
              <string>TextLabel</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
            </widget>
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="peak_pressure_lbl">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>250</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <family>Verdana</family>
@@ -3450,6 +3600,9 @@
             </property>
             <property name="text">
              <string>Pressão Pico</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -3466,10 +3619,25 @@
             <property name="text">
              <string>TextLabel</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
            </widget>
           </item>
           <item row="4" column="0">
            <widget class="QLabel" name="tidal_volume_lbl">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>250</width>
+              <height>32</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <family>Verdana</family>
@@ -3480,6 +3648,9 @@
             </property>
             <property name="text">
              <string>Volume Corrente</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -3496,6 +3667,9 @@
             <property name="text">
              <string>TextLabel</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
            </widget>
           </item>
           <item row="1" column="1">
@@ -3510,6 +3684,9 @@
             </property>
             <property name="text">
              <string>TextLabel</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -3549,7 +3726,7 @@
   <tabstop>PSV_rise_time_minus</tabstop>
   <tabstop>PSV_rise_time_plus</tabstop>
   <tabstop>al_volume_minute_chkBox</tabstop>
-  <tabstop>al_tidal_volume_max_dSpinBox</tabstop>
+  <tabstop>al_tidal_volume_max_spb</tabstop>
   <tabstop>al_tidal_volume_ok_btn</tabstop>
   <tabstop>al_plateau_pressure_chkBox</tabstop>
   <tabstop>al_PEEP_chkBox</tabstop>
@@ -3558,20 +3735,20 @@
   <tabstop>al_paw_chkBox</tabstop>
   <tabstop>al_flow_chkBox</tabstop>
   <tabstop>al_apnea_chkBox</tabstop>
-  <tabstop>al_volume_minute_min_dSpinBox</tabstop>
-  <tabstop>al_flow_min_dSpinBox</tabstop>
-  <tabstop>al_paw_min_dSpinBox</tabstop>
-  <tabstop>al_plateau_pressure_min_dSpinBox</tabstop>
-  <tabstop>al_PEEP_min_dSpinBox</tabstop>
-  <tabstop>al_frequency_min_dSpinBox</tabstop>
-  <tabstop>al_apnea_min_dSpinBox</tabstop>
-  <tabstop>al_apnea_max_dSpinBox</tabstop>
-  <tabstop>al_frequency_max_dSpinBox</tabstop>
-  <tabstop>al_PEEP_max_dSpinBox</tabstop>
-  <tabstop>al_plateau_pressure_max_dSpinBox</tabstop>
-  <tabstop>al_paw_max_dSpinBox</tabstop>
-  <tabstop>al_flow_max_dSpinBox</tabstop>
-  <tabstop>al_volume_minute_max_dSpinBox</tabstop>
+  <tabstop>al_volume_minute_min_spb</tabstop>
+  <tabstop>al_flow_min_spb</tabstop>
+  <tabstop>al_paw_min_spb</tabstop>
+  <tabstop>al_plateau_pressure_min_spb</tabstop>
+  <tabstop>al_PEEP_min_spb</tabstop>
+  <tabstop>al_frequency_min_spb</tabstop>
+  <tabstop>al_apnea_min_spb</tabstop>
+  <tabstop>al_apnea_max_spb</tabstop>
+  <tabstop>al_frequency_max_spb</tabstop>
+  <tabstop>al_PEEP_max_spb</tabstop>
+  <tabstop>al_plateau_pressure_max_spb</tabstop>
+  <tabstop>al_paw_max_spb</tabstop>
+  <tabstop>al_flow_max_spb</tabstop>
+  <tabstop>al_volume_minute_max_spb</tabstop>
   <tabstop>al_volume_minute_ok_btn</tabstop>
   <tabstop>al_flow_ok_btn</tabstop>
   <tabstop>al_paw_ok_btn</tabstop>
