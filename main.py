@@ -29,18 +29,20 @@ class ReadSensors(QtCore.QObject):
         # Classes that creates the instances of IO classes
         self.gauge = pressure_gauge()
         self.meter = flowmeter()
+        self.tare_sensors = False
         # Associates the received queues with local variables
         self.flw_q = flw_q
         self.prs_q = prs_q
 
     def work(self):  # This function is what the new thread will execute
-        ui_update_frequency = 100  # Hz
+        ui_update_frequency = 40  # Hz
         ui_update_period = 1 / ui_update_frequency
         while(True):
             start = time.time()
             debug_print = False
 
             flow = self.gauge.read_flow_from_dp()
+            # flow = 0
             self.flw_q.put([time.time(), flow])
             # self.flw_q.join()
             # flow = self.meter.calc_flow(instant)
@@ -57,6 +59,7 @@ class ReadSensors(QtCore.QObject):
             #     print(f"Runtime - calc_volume: {1000 * (volume_time - flow_time):.0f} ms")
 
             pressure = self.gauge.read_pressure()
+            # pressure = 0
             self.prs_q.put([time.time(), pressure])
             # self.prs_q.join()
 
@@ -72,6 +75,10 @@ class ReadSensors(QtCore.QObject):
                 
             if debug_print == True:
                 print(f"Runtime - total: {1000 * runtime:.0f} ms")
+
+            if self.tare_sensors == True:
+                self.gauge.tare_sensors()
+                self.tare_sensors = False
 
 class ControlPiston(QtCore.QObject):
     signal_piston = QtCore.pyqtSignal(bool)
@@ -455,12 +462,18 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.create_graphs()
         self.create_threads()
 
+
         # Create a timer to update the graphs at some period
         self.timer = QtCore.QTimer()
         gui_update_frequency = 20  # FPS
         gui_update_period = 1000 / gui_update_frequency  # period in ms
         self.timer.start(gui_update_period)
         self.timer.timeout.connect(self.update_graphs)
+
+        # gets the tare after some seconds
+        time.sleep(10)
+        self.worker_sensors.tare_sensors = True
+
 
     def connect_buttons(self):
         # Buttons
@@ -596,7 +609,6 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
             lambda: self.change_value(self.al_volume_minute_max_spb, "+"))
         self.al_volume_minute_max_minus_btn.clicked.connect(
             lambda: self.change_value(self.al_volume_minute_max_spb, "-"))
-
 
     def create_graphs(self):
         # Definitions to create the graphs
@@ -739,6 +751,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.worker_buttons.signal_button.connect(self.spinbox_control)
         self.thread_buttons.started.connect(self.worker_buttons.read_queue)
         self.thread_buttons.start()
+
         
     def update_graphs(self):
         """
