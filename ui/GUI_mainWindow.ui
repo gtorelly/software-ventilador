@@ -155,7 +155,7 @@
            <enum>Qt::WheelFocus</enum>
           </property>
           <property name="currentIndex">
-           <number>4</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="VCV_tab">
            <attribute name="title">
@@ -483,6 +483,136 @@
                </layout>
               </item>
               <item row="2" column="0">
+               <widget class="QLabel" name="VCV_volume_min_lbl">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>200</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Volume Mín.</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_14">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QPushButton" name="VCV_volume_min_minus_btn">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>80</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <family>Verdana</family>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>-</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="VCV_volume_min_spb">
+                  <property name="minimumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>160</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="prefix">
+                   <string/>
+                  </property>
+                  <property name="suffix">
+                   <string> ml</string>
+                  </property>
+                  <property name="decimals">
+                   <number>0</number>
+                  </property>
+                  <property name="maximum">
+                   <double>1000.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>200.000000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="VCV_volume_min_plus_btn">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>80</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <family>Verdana</family>
+                    <pointsize>30</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                    <kerning>true</kerning>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>+</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="3" column="0">
                <widget class="QLabel" name="VCV_volume_max_lbl">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -512,7 +642,7 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
+              <item row="3" column="1">
                <layout class="QHBoxLayout" name="horizontalLayout_3">
                 <property name="spacing">
                  <number>0</number>
@@ -600,136 +730,6 @@
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>50</width>
-                    <height>50</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>80</width>
-                    <height>50</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>30</pointsize>
-                    <weight>75</weight>
-                    <bold>true</bold>
-                    <stylestrategy>PreferAntialias</stylestrategy>
-                    <kerning>true</kerning>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>+</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="3" column="0">
-               <widget class="QLabel" name="VCV_volume_min_lbl">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>200</width>
-                  <height>50</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>200</width>
-                  <height>50</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>Volume Mín.</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <layout class="QHBoxLayout" name="horizontalLayout_14">
-                <property name="spacing">
-                 <number>0</number>
-                </property>
-                <item>
-                 <widget class="QPushButton" name="VCV_volume_min_minus_btn">
-                  <property name="minimumSize">
-                   <size>
-                    <width>50</width>
-                    <height>50</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>80</width>
-                    <height>50</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <family>Verdana</family>
-                    <pointsize>30</pointsize>
-                    <weight>75</weight>
-                    <bold>true</bold>
-                    <stylestrategy>PreferAntialias</stylestrategy>
-                    <kerning>true</kerning>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>-</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QDoubleSpinBox" name="VCV_volume_min_spb">
-                  <property name="minimumSize">
-                   <size>
-                    <width>160</width>
-                    <height>50</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>160</width>
-                    <height>50</height>
-                   </size>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                  <property name="buttonSymbols">
-                   <enum>QAbstractSpinBox::NoButtons</enum>
-                  </property>
-                  <property name="prefix">
-                   <string/>
-                  </property>
-                  <property name="suffix">
-                   <string> ml</string>
-                  </property>
-                  <property name="decimals">
-                   <number>0</number>
-                  </property>
-                  <property name="maximum">
-                   <double>1000.000000000000000</double>
-                  </property>
-                  <property name="value">
-                   <double>200.000000000000000</double>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="VCV_volume_min_plus_btn">
                   <property name="minimumSize">
                    <size>
                     <width>50</width>
@@ -4999,6 +4999,24 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="exhale_time_val">
+            <property name="font">
+             <font>
+              <family>Verdana</family>
+              <pointsize>20</pointsize>
+              <stylestrategy>PreferAntialias</stylestrategy>
+              <kerning>true</kerning>
+             </font>
+            </property>
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="0">
            <widget class="QLabel" name="IE_ratio_lbl">
             <property name="sizePolicy">
@@ -5127,24 +5145,6 @@
           </item>
           <item row="4" column="1">
            <widget class="QLabel" name="tidal_volume_val">
-            <property name="font">
-             <font>
-              <family>Verdana</family>
-              <pointsize>20</pointsize>
-              <stylestrategy>PreferAntialias</stylestrategy>
-              <kerning>true</kerning>
-             </font>
-            </property>
-            <property name="text">
-             <string>TextLabel</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLabel" name="exhale_time_val">
             <property name="font">
              <font>
               <family>Verdana</family>
