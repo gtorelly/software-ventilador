@@ -155,7 +155,7 @@
            <enum>Qt::WheelFocus</enum>
           </property>
           <property name="currentIndex">
-           <number>2</number>
+           <number>4</number>
           </property>
           <widget class="QWidget" name="VCV_tab">
            <attribute name="title">
@@ -4888,6 +4888,20 @@
                </layout>
               </item>
              </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="config_tab">
+           <attribute name="title">
+            <string>Config</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_23">
+            <item>
+             <widget class="QPushButton" name="cfg_tare_btn">
+              <property name="text">
+               <string>Tara</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
