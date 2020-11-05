@@ -96,15 +96,13 @@ class pressure_gauge():
         # print(flow)
         return flow  # flow in liters per minute
 
-    def tare_sensors(self):
+    def tare_sensors(self, duration):
         """
         Called at the start of the routine to obtain the tare of both pressure sensors. This helps
         to obtain a more accurate measurement. Can also be called at other times when the ventilator
         is not operating.
-        These values are offset voltages read by the adc 
+        These values are offset voltages read by the adc.
         """
-        # defines a duration of the average measurement
-        duration = 5  # seconds
         prs_volts = []
         flw_volts = []
         start = time.time()

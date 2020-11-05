@@ -17,6 +17,7 @@ from hw_adc_pressure import pressure_gauge
 from hw_flowmeter import flowmeter
 from hw_piston import pneumatic_piston
 from hw_buttons import Buttons
+from hw_buzzer import buzzer
 
 class ReadSensors(QtCore.QObject):
     """
@@ -29,61 +30,44 @@ class ReadSensors(QtCore.QObject):
         # Classes that creates the instances of IO classes
         self.gauge = pressure_gauge()
         self.meter = flowmeter()
-        self.tare_sensors = False
         # Associates the received queues with local variables
         self.flw_q = flw_q
         self.prs_q = prs_q
 
-    def work(self):  # This function is what the new thread will execute
-        ui_update_frequency = 40  # Hz
-        ui_update_period = 1 / ui_update_frequency
+    def work(self):
+        """
+        Continuously reads the data from the sensors and feeds it to the main function through 
+        queues.
+        """
         while(True):
-            start = time.time()
             debug_print = False
+            if debug_print == True:
+                start = time.time()
 
             flow = self.gauge.read_flow_from_dp()
-            # flow = 0
             self.flw_q.put([time.time(), flow])
-            # self.flw_q.join()
-            # flow = self.meter.calc_flow(instant)
 
             if debug_print == True:
                 flow_time = time.time()
                 print(f"Runtime - calc_flow: {1000 * (flow_time - start):.0f} ms")
 
-            # volume = self.meter.calc_volume(period)
-            # self.vol_q.put([time.time(), volume])
-        
-            # if debug_print == True:
-            #     volume_time = time.time()
-            #     print(f"Runtime - calc_volume: {1000 * (volume_time - flow_time):.0f} ms")
-
             pressure = self.gauge.read_pressure()
-            # pressure = 0
             self.prs_q.put([time.time(), pressure])
-            # self.prs_q.join()
 
             if debug_print == True:
                 pressure_time = time.time()
-                print(f"Runtime - read_pressure: {1000 * (pressure_time - volume_time):.0f} ms")
-
-            # self.signal_sensors.emit([flow, volume, pressure])
-
-            runtime = time.time() - start
-            if runtime < ui_update_period:
-                time.sleep(ui_update_period - runtime)
+                print(f"Runtime - read_pressure: {1000 * (pressure_time - flow_time):.0f} ms")
                 
             if debug_print == True:
-                print(f"Runtime - total: {1000 * runtime:.0f} ms")
-
-            if self.tare_sensors == True:
-                self.gauge.tare_sensors()
-                self.tare_sensors = False
+                runtime = time.time() - start
+                print(f"Runtime - total: {1000 * runtime:.1f} ms")
+                print(f"Frequency: {1 / runtime:.1f} Hz")
 
 class ControlPiston(QtCore.QObject):
     signal_piston = QtCore.pyqtSignal(bool)
     signal_cycle_data = QtCore.pyqtSignal(dict)
     signal_startup_error = QtCore.pyqtSignal(bool)
+    signal_get_tare = QtCore.pyqtSignal(float)
     
     def __init__(self, gui, mode):
         super().__init__()
@@ -115,7 +99,7 @@ class ControlPiston(QtCore.QObject):
         self.cd["inhale_time"] = 0
         self.cd["exhale_time"] = 0
         self.cd["IE_ratio"] = 1
-        to = 2  # Timeout
+        to = 3  # Timeout
         startup_cycles = 0
         limit = 20
         while self.pst_pos != "top":
@@ -135,6 +119,13 @@ class ControlPiston(QtCore.QObject):
         print(f"startup_cycles: {startup_cycles}")
         self.cd["started_up"] = True
         self.signal_cycle_data.emit(self.cd)
+        # Duration of the first tare of the system
+        tare_duration = 5.0
+        time.sleep(tare_duration)
+        self.signal_get_tare.emit(tare_duration)
+        # Waits a little bit just to make sure that the respirator isn't working when the controller 
+        # is called
+        time.sleep(0.5)
         self.controller()
 
     def controller(self):
@@ -259,27 +250,28 @@ class ControlPiston(QtCore.QObject):
                 # goes down or stays down
                 try:
                     peak_prs = np.max(self.prs_data[1, idxs_last_cycle])
+                    # If the peak_prs is higher than the target and margin
+                    if peak_prs > tgt_prs * (1 + margin):
+                        PCV_ratio = PCV_ratio * peak_prs / (tgt_prs * (1 + 3 * margin))
+                    if peak_prs < tgt_prs * (1 - margin):
+                        PCV_ratio = PCV_ratio * peak_prs / (tgt_prs * (1 - 3 * margin))
+                    # Making sure that PCV_ratio is within the limits [0, 1]
+                    if PCV_ratio > 1:
+                        PCV_ratio = 1
+                    if PCV_ratio < 0:
+                        PCV_ratio = 1E-3
                 except:
+                    # couldn't define an better PCV_ratio, therefore don't change that.
                     peak_prs = 0
-                if peak_prs > tgt_prs * (1 + margin):
-                    print(f"Peak pressure {peak_prs:.1f} cmH2O is too high")
-                    PCV_ratio = PCV_ratio * (1 + margin)
-                elif peak_prs < tgt_prs * (1 - margin):
-                    print(f"Peak pressure {peak_prs:.1f} cmH2O is too low, open valve")
-                    PCV_ratio = PCV_ratio * (1 - margin)
-                else:
-                    print(f"Peak pressure is close to {tgt_prs:.1f}: {peak_prs:.1f} cmH2O")
-
                 # Defines how long each cycle takes. This is the main method of controlling the
                 # cycle in this mode.
                 t_move_down = inhale_time / (1 + PCV_ratio)
                 t_wait_down = inhale_time / (1 + 1 / PCV_ratio)
                 t_move_up = tgt_per - t_move_down - t_wait_down
-                #self.pst_dir = 0
 
             elif self.mode == 3:  # 'PSV'
                 """
-                This mode must detect a negative pressure (patient is inhale by itself) and start a 
+                This mode must detect a negative pressure (patient is trying to inhale) and start a 
                 cycle with the pressure limited 
                 """
                 tgt_prs = self.gui["PSV_pressure_spb"].value()
@@ -305,7 +297,7 @@ class ControlPiston(QtCore.QObject):
                 # cycle in this mode.
                 t_move_down = 1 / (1 + PCV_ratio)
                 t_wait_down = 1 / (1 + 1 / PCV_ratio)
-                t_move_up = tgt_per - t_move_down - t_wait_down
+                t_move_up = t_move_down + t_wait_down
 
                 sens_range = 0.2
                 ids_prs = np.where(time.time() - self.prs_data[0, :] < sens_range)[0]
@@ -333,6 +325,7 @@ class ControlPiston(QtCore.QObject):
             # After the configuration of the cycle times, perform the movement
             if self.mode in [1, 2, 3]:
                 move_start = time.time()
+                self.cd["inhale_instant"] = move_start
                 if self.pst_dir == 0:  # Should move down
                     # the movement will last a maximum of "t_move_down"
                     self.pst_pos = self.piston.piston_down(t_move_down)
@@ -434,6 +427,21 @@ class InterfaceControl(QtCore.QObject):
             elif key[0] in ["UP", "DOWN", "OK", "ROT"]:
                 self.signal_button.emit(key[0])
 
+class BuzBuzzer(QtCore.QObject):
+    """
+    Runs the buzzer in a separate thread, so that the main doesn't have to wait for the buzzer to 
+    stop buzzing
+    """
+    def __init__(self):
+        super().__init__()
+        self.buzzer = buzzer()
+        
+    def short_buzz(self):
+        self.buzzer.beep_for(0.1)
+
+    def long_buzz(self):
+        self.buzzer.beep_for(0.5)
+
 class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
     """
     Class that corresponds to the programs main window. The init starts the interface and essential
@@ -462,18 +470,12 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.create_graphs()
         self.create_threads()
 
-
-        # Create a timer to update the graphs at some period
+        # Creates a timer to update the graphs at some period
         self.timer = QtCore.QTimer()
         gui_update_frequency = 20  # FPS
         gui_update_period = 1000 / gui_update_frequency  # period in ms
         self.timer.start(gui_update_period)
         self.timer.timeout.connect(self.update_graphs)
-
-        # gets the tare after some seconds
-        time.sleep(10)
-        self.worker_sensors.tare_sensors = True
-
 
     def connect_buttons(self):
         # Buttons
@@ -610,6 +612,9 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.al_volume_minute_max_minus_btn.clicked.connect(
             lambda: self.change_value(self.al_volume_minute_max_spb, "-"))
 
+        # Configuration tab
+        self.cfg_tare_btn.clicked.connect(lambda: self.set_tare_var(5))
+
     def create_graphs(self):
         # Definitions to create the graphs
         # creates the pressure plot widget 
@@ -637,11 +642,12 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.prs_data = np.zeros([3, self.data_points])
         self.prs_data[0, :] = start_time
         self.prs_q = Queue()
-        self.tare = 0
+        self.prs_tare = 0
         
-        self.flw_data = np.zeros([2, self.data_points])
+        self.flw_data = np.zeros([3, self.data_points])
         self.flw_data[0, :] = start_time
         self.flw_q = Queue()
+        self.flw_tare = 0
         
         self.vol_data = np.zeros([2, self.data_points])
         self.vol_data[0, :] = start_time
@@ -692,6 +698,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         # This is the position of the anchor, in the coordinates of the graph
         self.vol_lbl.setPos(0.0, 0.0)
         self.run_counter = 0
+        self.get_tare = False
 
     def create_threads(self):
         """
@@ -712,12 +719,23 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
                      "PSV_pressure_spb":self.PSV_pressure_spb,
                      "PSV_sensitivity_spb":self.PSV_sensitivity_spb,
                      "PSV_inhale_pause_spb":self.PSV_inhale_pause_spb,
-                     "VCV_start_btn": self.VCV_start_btn,
-                     "PCV_start_btn": self.PCV_start_btn,
-                     "PSV_start_btn": self.PSV_start_btn,
-                     "VCV_stop_btn": self.VCV_stop_btn,
-                     "PCV_stop_btn": self.PCV_stop_btn,
-                     "PSV_stop_btn": self.PSV_stop_btn}
+                     "al_PEEP_min_spb":self.al_PEEP_min_spb,
+                     "al_apnea_min_spb":self.al_apnea_min_spb,
+                     "al_flow_min_spb":self.al_flow_min_spb,
+                     "al_frequency_min_spb":self.al_frequency_min_spb,
+                     "al_paw_min_spb":self.al_paw_min_spb,
+                     "al_plateau_pressure_min_spb":self.al_plateau_pressure_min_spb,
+                     "al_tidal_volume_min_spb":self.al_tidal_volume_min_spb,
+                     "al_volume_minute_min_spb":self.al_volume_minute_min_spb,
+                     "al_PEEP_max_spb":self.al_PEEP_max_spb,
+                     "al_apnea_max_spb":self.al_apnea_max_spb,
+                     "al_flow_max_spb":self.al_flow_max_spb,
+                     "al_frequency_max_spb":self.al_frequency_max_spb,
+                     "al_paw_max_spb":self.al_paw_max_spb,
+                     "al_plateau_pressure_max_spb":self.al_plateau_pressure_max_spb,
+                     "al_tidal_volume_max_spb":self.al_tidal_volume_max_spb,
+                     "al_volume_minute_max_spb":self.al_volume_minute_max_spb
+                     }
 
         # Sensors thread
         self.worker_sensors = ReadSensors(self.flw_q, self.prs_q)
@@ -741,6 +759,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.worker_piston.signal_cycle_data.connect(self.update_interface)
         self.worker_piston.signal_startup_error.connect(self.error_window.show)
         self.error_window.signal_retry_startup.connect(self.worker_piston.startup)
+        self.worker_piston.signal_get_tare.connect(self.set_tare_var)
         self.thread_piston.started.connect(self.worker_piston.startup)
         self.thread_piston.start()
 
@@ -752,20 +771,30 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.thread_buttons.started.connect(self.worker_buttons.read_queue)
         self.thread_buttons.start()
 
-        
+        # Buzzer thread
+        self.worker_buzzer = BuzBuzzer()
+        self.thread_buzzer = QtCore.QThread()
+        self.worker_buzzer.moveToThread(self.thread_buzzer)
+
+    def set_tare_var(self, tare_duration):
+        """
+        This function is used to set the variable "get_tare" that is accessed in "update graphs" to
+        calculate the tare of the pressure and flow. The tare duration corresponds to the time 
+        interval used to obtain the mean value and consider it the tare.
+        """
+        self.get_tare = True
+        self.tare_duration = tare_duration
+        self.worker_buzzer.long_buzz()
+
+    # try to use this funtion without having to create a new instance every cycle
     def update_graphs(self):
         """
         This function continuously checks if the queues have available data and update the graphs
         """
         profile_time = False
-        # The incoming data is a list with flow and volume in liters and l/min and pressure in cmH2O
-        # flow = sensor_data[0]
-        # volume = sensor_data[1]
-        # pressure = sensor_data[2]
-
-        # while True:
         if profile_time:
             start_time = time.time()
+
         # If both queues are empty, just wait
         if self.prs_q.empty() and self.flw_q.empty():
             time.sleep(0.1)
@@ -778,31 +807,24 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
             # Rolls the array
             self.prs_data = np.roll(self.prs_data, 1)
             # inserts the new data in the current i position
-            self.prs_data[:, 0] = (t, pressure - self.tare, pressure)
+            self.prs_data[:, 0] = (t, pressure - self.prs_tare, pressure)
             new_prs_data = True
         if new_prs_data:
             # Signals that it got all the data from the queue and the sensors can continue to put
             # new data in the queue
             self.prs_q.task_done()
-            # Calculates the tare (baseline) of the pressure sensor
-            # If the pressure deviation over the entire measurement is below the standard dev,
-            # assume that it is stable enough, so it is the baseline.
-            std_limit = 0.02
-            std = np.std(self.prs_data[2, :])
-            if std < std_limit:
-                self.tare = np.mean(self.prs_data[2, :])
-                self.prs_data[1, :] = self.prs_data[2, :] - self.tare
+
             # Update the graph data with data only within the chosen time_range
             now = time.time()
-            idxs_tr = np.where(now - self.prs_data[0, :] < 
-                               self.time_range[1] - self.time_range[0])[0]
-            self.prs_graph.setData(self.prs_data[0, idxs_tr] - now, self.prs_data[1, idxs_tr])
-            std_dev = np.std(self.prs_data[1, idxs_tr])
+            i_tr_prs = np.where(now - self.prs_data[0, :] <
+                                self.time_range[1] - self.time_range[0])[0]
+            self.prs_graph.setData(self.prs_data[0, i_tr_prs] - now, self.prs_data[1, i_tr_prs])
             # Updates the graph title
-            self.prs_pw.setTitle(f"Pressão: {self.prs_data[1, 0]:.1f} cmH2O +- {std_dev:.2f}",
-                                 **self.ttl_style)
+            self.prs_pw.setTitle(f"Pressão: {self.prs_data[1, 0]:.1f} cmH2O", **self.ttl_style)
+
             # Updates the data that is given to the piston function
             self.worker_piston.prs_data = self.prs_data
+
             if profile_time == True:
                 time_at_pressure = time.time()
                 print(f"Until pressure graph: {time_at_pressure - start_time:.4f} s")
@@ -814,48 +836,54 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
             # Rolls the array
             self.flw_data = np.roll(self.flw_data, 1)
             # inserts the new data in the current i position
-            self.flw_data[:, 0] = (t, flow)
+            self.flw_data[:, 0] = (t, flow - self.flw_tare, flow)
             new_flw_data = True
         if new_flw_data:
             # Signals that it got all the data from the queue and the sensors can continue to put
             # new data in the queue
             self.flw_q.task_done()
+
             # Update the graph data with data only within the chosen time_range
             now = time.time()
-            idxs_tr = np.where(now - self.flw_data[0, :] < 
-                               self.time_range[1] - self.time_range[0])[0]
-            std_dev = np.std(self.flw_data[1, idxs_tr])
-            self.flw_pw.setTitle(f"Fluxo: {flow:.1f} l/min +- {std_dev:.2f}",
-                                 **self.ttl_style)
-            self.flw_graph.setData(self.flw_data[0, idxs_tr] - now, self.flw_data[1, idxs_tr])
+            i_tr_flw = np.where(now - self.flw_data[0, :] < 
+                                self.time_range[1] - self.time_range[0])[0]
+            self.flw_pw.setTitle(f"Fluxo: {self.flw_data[1, 0]:.1f} l/min", **self.ttl_style)
+            self.flw_graph.setData(self.flw_data[0, i_tr_flw] - now, self.flw_data[1, i_tr_flw])
+
             # Updates the data that is given to the piston function
             self.worker_piston.flw_data = self.flw_data
+
             if profile_time == True:
                 time_at_flow = time.time()
                 print(f"Until flow graph: {time_at_flow - start_time:.4f} s")
         
             # Calculating volume from the flow
             now = time.time()
-            last_inhale = 5
+            try:
+                last_inhale = now - self.cd["inhale_instant"]
+            except:
+                last_inhale = 3
             # Gets the indexes of the data since the last breath
-            idxs_li = np.where(now - self.flw_data[0, :] < last_inhale)[0]
-            volume = np.sum(self.flw_data[1, idxs_li]) / (60 * last_inhale)
+            i_li = np.where(now - self.flw_data[0, :] < last_inhale)[0]
+            volume = np.sum(self.flw_data[1, i_li]) / (60 * last_inhale)
             # Converting the volume from L to mL
             volume = 1000 * volume
             self.vol_data = np.roll(self.vol_data, 1)
             self.vol_data[:, 0] = (self.flw_data[0, 0], volume)
-            idxs_tr = np.where(now - self.vol_data[0, :] < 
-                               self.time_range[1] - self.time_range[0])[0]
-            std_dev = np.std(self.vol_data[1, idxs_tr])
-            self.vol_pw.setTitle(f"Volume: {volume:.0f} ml +- {std_dev:.1f}",
-                                 **self.ttl_style)
-            self.vol_graph.setData(self.vol_data[0, idxs_tr] - now, self.vol_data[1, idxs_tr])
+            i_tr_vol = np.where(now - self.vol_data[0, :] < 
+                                self.time_range[1] - self.time_range[0])[0]
+
+            self.vol_pw.setTitle(f"Volume: {self.vol_data[1, 0]:.0f} ml", **self.ttl_style)
+            self.vol_graph.setData(self.vol_data[0, i_tr_vol] - now, self.vol_data[1, i_tr_vol])
+
             # Updates the data that is given to the piston function
             self.worker_piston.vol_data = self.vol_data
-            mean_pts = 50
+
+            mean_pts = 10
             FPS = np.nan_to_num(1.0 / np.mean(self.vol_data[0, 0:mean_pts] - 
                                 self.vol_data[0, 1:1+mean_pts]))
-            self.vol_lbl.setText(f"FPS: {FPS:.1f}")
+            self.vol_lbl.setText(f"FPS: {FPS:.2f}")
+
             if profile_time == True:
                 time_at_volume = time.time()
                 print(f"After the volume graph: {time_at_volume - time_at_flow:.4f} s")
@@ -866,17 +894,38 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         
         N = 20
         if self.run_counter % N == 0:
-            self.vol_pw.setYRange(np.min(self.vol_data[1, idxs_tr]),
-                                  np.max(self.vol_data[1, idxs_tr]),
-                                  self.padding)
-            self.prs_pw.setYRange(np.min(self.prs_data[1, idxs_tr]),
-                                  np.max(self.prs_data[1, idxs_tr]),
-                                  self.padding)
-            self.flw_pw.setYRange(np.min(self.flw_data[1, idxs_tr]),
-                                  np.max(self.flw_data[1, idxs_tr]),
-                                  self.padding)
+            # definition of the minimum acceptable range for the volume
+            min_range_vol = [-5, 50]
+            # Get the max and min from each data set 
+            range_vol = [np.min(self.vol_data[1, i_tr_vol]), np.max(self.vol_data[1, i_tr_vol])]
+            # Adjusts the minimum and maximum, if the measured values are outside the minimum range
+            self.vol_pw.setYRange(np.min([range_vol[0], min_range_vol[0]]), 
+                                  np.max([range_vol[1], min_range_vol[1]]))
+
+            min_range_prs = [-0.2, 5]
+            range_prs = [np.min(self.prs_data[1, i_tr_prs]), np.max(self.prs_data[1, i_tr_prs])]
+            self.prs_pw.setYRange(np.min([range_prs[0], min_range_prs[0]]), 
+                                  np.max([range_prs[1], min_range_prs[1]]))
+
+            min_range_flw = [-0.2, 5]
+            range_flw = [np.min(self.flw_data[1, i_tr_flw]), np.max(self.flw_data[1, i_tr_flw])]
+            self.flw_pw.setYRange(np.min([range_flw[0], min_range_flw[0]]), 
+                                  np.max([range_flw[1], min_range_flw[1]]))
             self.run_counter = 0
         self.run_counter += 1
+
+        # Gets the tare of the pressure and flow sensors and updates the data 
+        if self.get_tare and self.worker_piston.mode == 0:
+            idxs_flw_tare = np.where(time.time() - self.flw_data[0, :] < self.tare_duration)[0]
+            self.flw_tare = np.mean(self.flw_data[2, idxs_flw_tare])
+            self.flw_data[1, :] = self.flw_data[2, :] - self.flw_tare
+            idxs_prs_tare = np.where(time.time() - self.prs_data[0, :] < self.tare_duration)[0]
+            self.prs_tare = np.mean(self.prs_data[2, idxs_prs_tare])
+            self.prs_data[1, :] = self.prs_data[2, :] - self.prs_tare
+            self.get_tare = False
+        if self.get_tare and self.worker_piston.mode != 0:
+            print("The respirator must be stopped before adjusting the tare.")
+            self.get_tare = False
 
     def exit(self):
         sys.exit()
@@ -942,7 +991,6 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         self.peak_pressure_val.setText("0,0 cm H2O")
         self.tidal_volume_val.setText("0 ml")
 
-    @QtCore.pyqtSlot(str)
     def spinbox_control(self, action):
         """
         Finds the active (in focus, last clicked) spinbox and increases or decreases its value,
@@ -952,16 +1000,17 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         # in focus, or choose one to be in focus 
         c_tab = self.tabWidget.currentIndex()
         tab_content = {0:[self.VCV_frequency_spb,
-                          self.VCV_flow_spb,
-                          self.VCV_volume_spb,
+                          self.VCV_pressure_max_spb,
+                          self.VCV_volume_max_spb,
+                          self.VCV_volume_min_spb,
                           self.VCV_inhale_pause_spb],
                        1:[self.PCV_frequency_spb,
-                          self.PCV_rise_time_spb,
-                          self.PCV_inhale_time_spb,
                           self.PCV_pressure_spb,
+                          self.PCV_inhale_time_spb,
+                          self.PCV_volume_max_spb,
                           self.PCV_inhale_pause_spb],
                        2:[self.PSV_pressure_spb,
-                          self.PSV_rise_time_spb,
+                          self.PSV_sensitivity_spb,
                           self.PSV_inhale_pause_spb],
                        3:[self.al_tidal_volume_min_spb,
                           self.al_tidal_volume_max_spb,
@@ -1103,17 +1152,18 @@ class DesignerMainWindow(QtWidgets.QMainWindow, Ui_Respirador):
         """
         self.worker_piston.pause = True
 
-    @QtCore.pyqtSlot(dict)
     def update_interface(self, cd):
         """
         Receives information about the last cycle in the form of a dict and updates the GUI based on
         that.
         """
-        self.inhale_time_val.setText(f"{cd['inhale_time']:.1f} s")
-        self.exhale_time_val.setText(f"{cd['exhale_time']:.1f} s")
-        self.IE_ratio_val.setText(f"1:{cd['IE_ratio']:.1f}")
-        self.peak_pressure_val.setText(f"{cd['peak_pressure']:.2f} cmH2O")
-        self.tidal_volume_val.setText(f"{cd['tidal_volume']:.0f} ml")
+        # Creating a self.cd so that other methods can access it
+        self.cd = cd
+        self.inhale_time_val.setText(f"{self.cd['inhale_time']:.1f} s")
+        self.exhale_time_val.setText(f"{self.cd['exhale_time']:.1f} s")
+        self.IE_ratio_val.setText(f"1:{self.cd['IE_ratio']:.1f}")
+        self.peak_pressure_val.setText(f"{self.cd['peak_pressure']:.2f} cmH2O")
+        self.tidal_volume_val.setText(f"{self.cd['tidal_volume']:.0f} ml")
 
 class AboutWindow(QtWidgets.QMainWindow, Ui_Sobre):
     """Customization for Qt Designer created window"""
