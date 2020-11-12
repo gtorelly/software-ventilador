@@ -236,7 +236,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -265,13 +265,13 @@
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -314,7 +314,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -386,7 +386,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -415,13 +415,13 @@
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -461,7 +461,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -525,7 +525,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -548,13 +548,13 @@
                  <widget class="QDoubleSpinBox" name="VCV_volume_min_spb">
                   <property name="minimumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -591,7 +591,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -663,7 +663,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -692,13 +692,13 @@
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -738,7 +738,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -807,7 +807,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -836,13 +836,13 @@
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -885,7 +885,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1055,7 +1055,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1084,13 +1084,13 @@
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1133,7 +1133,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1211,7 +1211,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1240,13 +1240,13 @@
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1286,7 +1286,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1364,7 +1364,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1393,13 +1393,13 @@
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1442,7 +1442,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1523,7 +1523,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1552,13 +1552,13 @@
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1601,7 +1601,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1676,7 +1676,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1705,13 +1705,13 @@
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1754,7 +1754,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1924,7 +1924,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1947,13 +1947,13 @@
                  <widget class="QDoubleSpinBox" name="PSV_pressure_spb">
                   <property name="minimumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -1993,7 +1993,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -2051,7 +2051,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -2074,13 +2074,13 @@
                  <widget class="QDoubleSpinBox" name="PSV_sensitivity_spb">
                   <property name="minimumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -2117,7 +2117,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -2195,7 +2195,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -2218,13 +2218,13 @@
                  <widget class="QDoubleSpinBox" name="PSV_inhale_time_spb">
                   <property name="minimumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -2267,7 +2267,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -2393,7 +2393,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -2416,13 +2416,13 @@
                  <widget class="QDoubleSpinBox" name="PSV_inhale_pause_spb">
                   <property name="minimumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>160</width>
+                    <width>200</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -2476,7 +2476,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>80</width>
+                    <width>50</width>
                     <height>50</height>
                    </size>
                   </property>
@@ -4896,12 +4896,166 @@
             <string>Config</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_23">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
             <item>
-             <widget class="QPushButton" name="cfg_tare_btn">
+             <layout class="QHBoxLayout" name="horizontalLayout_18">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QPushButton" name="cfg_tare_btn">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777213</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Tara</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cfg_tare_minus_btn">
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>50</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>30</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>-</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="cfg_tare_spb">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777213</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::NoButtons</enum>
+                </property>
+                <property name="suffix">
+                 <string> s</string>
+                </property>
+                <property name="decimals">
+                 <number>1</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cfg_tare_plus_btn">
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>50</width>
+                  <height>50</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Verdana</family>
+                  <pointsize>30</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                  <stylestrategy>PreferAntialias</stylestrategy>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>+</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QLabel" name="fps_lbl">
               <property name="text">
-               <string>Tara</string>
+               <string>FPS:</string>
               </property>
              </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="beep_chkBox">
+              <property name="text">
+               <string>Beep</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="led_chkBox">
+              <property name="text">
+               <string>LED</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </widget>
@@ -5171,14 +5325,14 @@
   </widget>
  </widget>
  <tabstops>
+  <tabstop>VCV_frequency_plus_btn</tabstop>
+  <tabstop>VCV_pressure_max_plus_btn</tabstop>
+  <tabstop>VCV_volume_min_plus_btn</tabstop>
+  <tabstop>VCV_volume_max_plus_btn</tabstop>
   <tabstop>VCV_inhale_pause_plus_btn</tabstop>
   <tabstop>VCV_start_btn</tabstop>
-  <tabstop>VCV_stop_btn</tabstop>
-  <tabstop>VCV_pressure_max_minus_btn</tabstop>
-  <tabstop>VCV_pressure_max_plus_btn</tabstop>
-  <tabstop>VCV_frequency_plus_btn</tabstop>
   <tabstop>VCV_frequency_minus_btn</tabstop>
-  <tabstop>VCV_volume_max_plus_btn</tabstop>
+  <tabstop>VCV_pressure_max_minus_btn</tabstop>
   <tabstop>VCV_volume_max_minus_btn</tabstop>
   <tabstop>PCV_start_btn</tabstop>
   <tabstop>PCV_stop_btn</tabstop>
@@ -5221,6 +5375,78 @@
   <tabstop>PSV_inhale_pause_btn</tabstop>
   <tabstop>PSV_inhale_pause_minus_btn</tabstop>
   <tabstop>PSV_inhale_pause_plus_btn</tabstop>
+  <tabstop>VCV_frequency_spb</tabstop>
+  <tabstop>VCV_pressure_max_spb</tabstop>
+  <tabstop>VCV_volume_min_minus_btn</tabstop>
+  <tabstop>VCV_volume_min_spb</tabstop>
+  <tabstop>VCV_stop_btn</tabstop>
+  <tabstop>VCV_volume_max_spb</tabstop>
+  <tabstop>VCV_inhale_pause_spb</tabstop>
+  <tabstop>PCV_frequency_spb</tabstop>
+  <tabstop>PCV_pressure_spb</tabstop>
+  <tabstop>PCV_inhale_time_spb</tabstop>
+  <tabstop>PCV_volume_max_spb</tabstop>
+  <tabstop>PCV_inhale_pause_spb</tabstop>
+  <tabstop>PSV_pressure_spb</tabstop>
+  <tabstop>PSV_sensitivity_minus_btn</tabstop>
+  <tabstop>PSV_sensitivity_spb</tabstop>
+  <tabstop>PSV_sensitivity_plus_btn</tabstop>
+  <tabstop>PSV_inhale_time_spb</tabstop>
+  <tabstop>PSV_inhale_pause_spb</tabstop>
+  <tabstop>al_frequency_min_spb</tabstop>
+  <tabstop>al_frequency_min_plus_btn</tabstop>
+  <tabstop>al_frequency_min_minus_btn</tabstop>
+  <tabstop>al_paw_min_spb</tabstop>
+  <tabstop>al_paw_min_plus_btn</tabstop>
+  <tabstop>al_paw_min_minus_btn</tabstop>
+  <tabstop>al_volume_minute_min_spb</tabstop>
+  <tabstop>al_volume_minute_min_plus_btn</tabstop>
+  <tabstop>al_volume_minute_min_minus_btn</tabstop>
+  <tabstop>al_apnea_min_spb</tabstop>
+  <tabstop>al_apnea_min_plus_btn</tabstop>
+  <tabstop>al_apnea_min_minus_btn</tabstop>
+  <tabstop>al_flow_min_spb</tabstop>
+  <tabstop>al_flow_min_plus_btn</tabstop>
+  <tabstop>al_flow_min_minus_btn</tabstop>
+  <tabstop>al_tidal_volume_min_spb</tabstop>
+  <tabstop>al_tidal_volume_min_plus_btn</tabstop>
+  <tabstop>al_tidal_volume_min_minus_btn</tabstop>
+  <tabstop>al_apnea_max_spb</tabstop>
+  <tabstop>al_apnea_max_plus_btn</tabstop>
+  <tabstop>al_apnea_max_minus_btn</tabstop>
+  <tabstop>al_paw_max_spb</tabstop>
+  <tabstop>al_paw_max_plus_btn</tabstop>
+  <tabstop>al_paw_max_minus_btn</tabstop>
+  <tabstop>al_frequency_max_spb</tabstop>
+  <tabstop>al_frequency_max_plus_btn</tabstop>
+  <tabstop>al_frequency_max_minus_btn</tabstop>
+  <tabstop>al_plateau_pressure_max_spb</tabstop>
+  <tabstop>al_plateau_pressure_max_plus_btn</tabstop>
+  <tabstop>al_plateau_pressure_max_minus_btn</tabstop>
+  <tabstop>al_plateau_pressure_min_spb</tabstop>
+  <tabstop>al_plateau_pressure_min_plus_btn</tabstop>
+  <tabstop>al_plateau_pressure_min_minus_btn</tabstop>
+  <tabstop>al_PEEP_min_spb</tabstop>
+  <tabstop>al_PEEP_min_plus_btn</tabstop>
+  <tabstop>al_PEEP_min_minus_btn</tabstop>
+  <tabstop>al_tidal_volume_max_spb</tabstop>
+  <tabstop>al_tidal_volume_max_plus_btn</tabstop>
+  <tabstop>al_tidal_volume_max_minus_btn</tabstop>
+  <tabstop>al_flow_max_spb</tabstop>
+  <tabstop>al_flow_max_plus_btn</tabstop>
+  <tabstop>al_flow_max_minus_btn</tabstop>
+  <tabstop>al_volume_minute_max_spb</tabstop>
+  <tabstop>al_volume_minute_max_plus_btn</tabstop>
+  <tabstop>al_volume_minute_max_minus_btn</tabstop>
+  <tabstop>al_PEEP_max_spb</tabstop>
+  <tabstop>al_PEEP_max_plus_btn</tabstop>
+  <tabstop>al_PEEP_max_minus_btn</tabstop>
+  <tabstop>cfg_tare_btn</tabstop>
+  <tabstop>cfg_tare_spb</tabstop>
+  <tabstop>cfg_tare_minus_btn</tabstop>
+  <tabstop>cfg_tare_plus_btn</tabstop>
+  <tabstop>beep_chkBox</tabstop>
+  <tabstop>led_chkBox</tabstop>
  </tabstops>
  <resources/>
  <connections/>
