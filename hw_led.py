@@ -19,14 +19,5 @@ class led():
         GPIO.output(self.led_pin, 1)
 
     def light_for(self, duration):
-        # QtCore.QTimer.singleShot(0, lambda: GPIO.output(self.led_pin, 0))
         GPIO.output(self.led_pin, 0)
         QtCore.QTimer.singleShot(1000 * duration, lambda: GPIO.output(self.led_pin, 1))
-        # QtCore.QTimer.singleShot(duration, self.dummy)
-        # time.sleep(duration)
-        # QtCore.QThread.sleep(1)
-        # GPIO.output(self.led_pin, 1)
-
-    # def dummy(self):
-    #     time.sleep(1)
-    #     pass

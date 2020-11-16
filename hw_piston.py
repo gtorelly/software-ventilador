@@ -3,6 +3,7 @@ Definition of the pneumatic piston control
 """
 import RPi.GPIO as GPIO
 import time
+from PyQt5 import QtCore
 
 class pneumatic_piston():
     def __init__(self, parent=None):
@@ -36,6 +37,7 @@ class pneumatic_piston():
         if GPIO.input(self.pin_sensor_down) == True:
             # The piston is already at the lowest position.
             return 'bottom'
+        GPIO.output(self.pin_up, 0)  # Guarantees the piston is not going up
         GPIO.output(self.pin_down, 1)
         # The timeout must be an int in ms
         ms_duration = int(round(1000 * duration, 0))
@@ -62,6 +64,7 @@ class pneumatic_piston():
         if GPIO.input(self.pin_sensor_up) == True:
             # The piston is already at the highest position.
             return 'top'
+        GPIO.output(self.pin_down, 0)  # Guarantees the piston is not going down
         GPIO.output(self.pin_up, 1)  # Makes the piston go up
         # The timeout must be an int in ms
         ms_duration = int(round(1000 * duration, 0))
@@ -73,23 +76,15 @@ class pneumatic_piston():
         if up is None: # Timeout occurred
             return None
         return 'top'
-         
-    def piston_up_no_stop(self, timeout):
-        # Turn on the up output
-        GPIO.output(self.pin_up, 1)
-        # wait
-        time.sleep(timeout)
-        # turn off the up output
+
+    def emergency(self):
+         # Send the piston up
+         GPIO.output(self.pin_up, 1)
+         GPIO.output(self.pin_down, 0)
+         # After 10 seconds, turn off the up output
+         QtCore.QTimer.singleShot(10000, lambda: GPIO.output(self.pin_up, 0))
+
+    def stop(self):
+        # shuts down both outputs
         GPIO.output(self.pin_up, 0)
-        
-    def piston_down_no_stop(self, timeout):
-        # Turn on the down output
-        GPIO.output(self.pin_down, 1)
-        # wait
-        time.sleep(timeout)
-        # turn off the down output
         GPIO.output(self.pin_down, 0)
-            
-            
-            
-        

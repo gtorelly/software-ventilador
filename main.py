@@ -7,15 +7,13 @@ import os
 from PyQt5 import QtWidgets, QtCore, uic
 import pyqtgraph as pg
 from queue import Queue
+from scipy import integrate
 import sys
 import time
-# from ui.Ui_GUI_mainWindow import Ui_Respirador
-# from ui.Ui_GUI_sobre import Ui_Sobre
-# from ui.Ui_GUI_startup_error import Ui_StartupError
 
 # Hardware control files
 from hw_adc_pressure import pressure_gauge
-from hw_flowmeter import flowmeter
+# from hw_flowmeter import flowmeter
 from hw_piston import pneumatic_piston
 from hw_buttons import Buttons
 from hw_buzzer import buzzer
@@ -31,7 +29,7 @@ class ReadSensors(QtCore.QObject):
         super().__init__()
         # Classes that creates the instances of IO classes
         self.gauge = pressure_gauge()
-        self.meter = flowmeter()
+        # self.meter = flowmeter()
         # Associates the received queues with local variables
         self.flw_q = flw_q
         self.prs_q = prs_q
@@ -130,6 +128,81 @@ class ControlPiston(QtCore.QObject):
         time.sleep(0.5)
         self.controller()
 
+    def running_controller(self):
+        """
+        Controlling the piston movement timing without sleeps. Runs continuously checking whether 
+        a long enough time has passed since the last moment. Calculates the appropriate timing based
+        on the current mode.
+        This function is the third attempt at improving the piston control method.
+        """
+        # Creating variables used to run the loop continuously
+        last_inhale_t = time.time()
+        last_exhale_t = last_inhale_t + 1
+        next_inhale_t = last_exhale_t + 1
+        next_exhale_t = next_inhale_t + 1
+        next_move = "inhale"
+
+        # Working loop
+        while True:
+            now = time.time()
+            # After the configuration of the cycle times, perform the movement
+            # VCV or PCV
+            if self.mode in [1, 2]:
+                # If the next movement is inhale and sufficient time has passed, inhale
+                if next_move == "inhale" and now > next_inhale_t:
+                    # move 
+                    self.pst_pos = self.piston.piston_down(t_move_down)
+                    
+                    # calculate the instant of the next inhale
+
+                    
+                    next_move = "exhale"
+
+
+                if next_move == "exhale" and now > next_exhale_t:
+                    next_move = "inhale"
+                move_start = time.time()
+                self.cd["inhale_instant"] = move_start
+                if self.pst_dir == 0:  # Should move down
+                    # the movement will last a maximum of "t_move_down"
+                    self.pst_pos = self.piston.piston_down(t_move_down)
+                    # Waits until t_move_down is completed, in case the piston descended faster
+                    move_down_dur = time.time() - move_start
+                    if move_down_dur < t_move_down:
+                        time.sleep(t_move_down - move_down_dur)
+                    # If the pause button was pressed, pauses 
+                    if self.pause == True:
+                        time.sleep(self.pause_duration)
+                        t_wait_down = t_wait_down - self.pause_duration
+                        self.pause = False
+                    # if the piston needs to wait in the down position
+                    if t_wait_down > 0:
+                        time.sleep(t_wait_down)
+                    self.pst_dir = 1
+                    down_cycle_end = time.time()
+                
+                elif self.pst_dir == 1:  # Should move up
+                    self.pst_pos = self.piston.piston_up(t_move_up)
+                    move_up_dur = time.time() - move_start
+                    # If this movement was faster than the expected duration, wait
+                    if move_up_dur < t_move_up:
+                        time.sleep(t_move_up - move_up_dur)
+                    # if the piston needs to wait in the up position
+                    if t_wait_up > 0:
+                        time.sleep(t_wait_up)
+                    self.pst_dir = 0
+                    up_cycle_end = time.time()
+            # PSV
+            elif self.mode == 3:
+                pass
+            # Emergency mode
+            elif self.mode == 4:
+                self.piston.emergency()
+
+            # Stop
+            else:
+                self.piston.stop()
+
     def controller(self):
         """
         This function intends to replace all the separate functions that were developed to control
@@ -156,26 +229,53 @@ class ControlPiston(QtCore.QObject):
         # 5% margin of error for the target values
         margin = 0.05
 
+        # creating lists to store information from the previous cycles, in order to calculate what
+        # needs to be changed for the next cycles. These lists will have a fixed maximum length.
+        list_max_len = 10
+        self.cd["pk_prs_lst"] = []
+        self.cd["pk_flw_lst"] = []
+        self.cd["pk_vol_lst"] = []
+
+        # Minimum time to move the piston down
+        minimum_tmd = 0.2  # s
+        
         # Variable created for the PSV mode
         triggered_last_cycle = False
 
         # Starts the automatic loop
         while True:
-            # Uses flow for the calculation of the indexes, but flow, volume and pressure are
-            # stored simultaneously, so it shouldn't make a difference
-            idxs_last_cycle = np.where(time.time() - self.flw_data[0, :] < last_cycle_dur)[0]
+            # Finds the indexes of data from the last cycle for flow and pressure
+            i_flw = np.where(time.time() - self.flw_data[0, :] < last_cycle_dur)[0]
+            i_prs = np.where(time.time() - self.prs_data[0, :] < last_cycle_dur)[0]
             
             # Sends the maximum pressure and volume in the last cycle to the interface
             # This try-except logic is just to avoid a problem when the max of an empty array is 
             # calculated, leading to an error.
             try:
-                peak_prs = np.max(self.prs_data[1, idxs_last_cycle])
+                peak_prs = np.max(self.prs_data[1, i_prs])
             except:
                 peak_prs = 0
             try:
-                peak_vol = np.max(self.vol_data[1, idxs_last_cycle])
+                peak_flw = np.max(self.flw_data[1, i_flw])
+            except:
+                peak_flw = 0
+            try:
+                peak_vol = np.max(self.vol_data[1, i_flw])
             except:
                 peak_vol = 0
+                
+            # Appends new data to the lists
+            self.cd["pk_prs_lst"].append(peak_prs)
+            self.cd["pk_flw_lst"].append(peak_flw)
+            self.cd["pk_vol_lst"].append(peak_vol)
+            # If the list is too long, remove the first element (oldest)
+            if len(self.cd["pk_prs_lst"]) > list_max_len:
+                self.cd["pk_prs_lst"].pop(0)
+            if len(self.cd["pk_flw_lst"]) > list_max_len:
+                self.cd["pk_flw_lst"].pop(0)
+            if len(self.cd["pk_vol_lst"]) > list_max_len:
+                self.cd["pk_vol_lst"].pop(0)
+
             self.cd["peak_pressure"] = peak_prs
             self.cd["tidal_volume"] = peak_vol
 
@@ -193,43 +293,65 @@ class ControlPiston(QtCore.QObject):
                 tgt_vol = (vol_max + vol_min) / 2.0 
                 # There should be a limit to the pressure
                 prs_max = self.gui["VCV_pressure_max_spb"].value()
+                # In case the person operating the respirator wants to measure the plateau pressure
                 self.pause_duration = self.gui["VCV_inhale_pause_spb"].value()
+                changes = False
 
                 # On the first cycle, use standard values
                 if first_cycle:
-                    t_move_down = tgt_per / 4.
+                    inhale_time = tgt_per / 4.
                     first_cycle = False
                     # Defines how long each cycle takes, enabling the volume control
-                    t_move_up = tgt_per - t_move_down
+                    t_move_up = tgt_per - inhale_time
                     continue  # skips the rest of the for loop on the first cycle
-                # Calculate the peak volume and pressure for the last cycle
-                try:
-                    peak_vol = np.max(self.vol_data[1, idxs_last_cycle])
-                except:
-                    peak_vol = 0
-                print(f"Peak volume: {peak_vol:.1f}")
 
-                    
                 if peak_vol > vol_max:
-                    t_move_down = t_move_down * tgt_vol / peak_vol
-                    print(f"Volume is too high, reducing t_move_down to {t_move_down:.2f}")
+                    changes = True
+                    inhale_time = inhale_time * tgt_vol / peak_vol
+                    if inhale_time < minimum_tmd:
+                        inhale_time = minimum_tmd
+                    # print(f"Volume is too high, reducing inhale_time to {inhale_time:.2f}")
                 if peak_vol < vol_min:
+                    changes = True
                     if peak_vol == 0:  # Avoiding a division by zero
-                        new_t_move_down = t_move_down * (1.0 + margin)
+                        new_inhale_time = inhale_time * (1.0 + margin)
                     else:  # Proportional increase
-                        new_t_move_down = t_move_down * tgt_vol / peak_vol
-                    if new_t_move_down > tgt_per * 0.5:
-                        t_move_down = tgt_per * 0.5
-                        print(f"t_move_down is too long, limited at 50% cycle: {t_move_down:.2f}")
-                        
+                        new_inhale_time = inhale_time * tgt_vol / peak_vol
+                    if new_inhale_time > tgt_per * 0.5:
+                        inhale_time = tgt_per * 0.5
                     else:
-                        t_move_down = new_t_move_down
-                        print(f"Volume is too low, increasing t_move_down to {t_move_down:.2f}")
+                        inhale_time = new_inhale_time
+
+                # The pressure limit dictates how long the piston goes down or stays down
+                # PCV_ratio is how much of the move down time the piston just waits.
+                # if PCV_ratio is 1, the piston doesn't go down, only wait.
+                # if PCV_ratio is 0, all the time is spent going down, no wait.
+                # if PCV_ratio is 0.5, half of the time it goes down, then wait the other half.
+                # To reduce the peak pressure, increase the ratio
+                # If the peak_prs is higher than the limit
+                if peak_prs > prs_max:
+                    PCV_ratio = PCV_ratio * peak_prs / (prs_max)
+                
+                # If a change in inhaletime was not performed this cycle and 
+                # if it is operating at less than 80% of the max pressure, increase the pcv ratio
+                elif peak_prs < 0.8 * prs_max and not changes:
+                    PCV_ratio = PCV_ratio * 0.95
+                # Making sure that PCV_ratio is within the limits [0, 1]
+                if PCV_ratio > 1:
+                    PCV_ratio = 1
+                if PCV_ratio < 0:
+                    PCV_ratio = 1E-3
+
+                # Defines how long each cycle takes. This is the main method of controlling the
+                # cycle in this mode.
+                t_move_down = inhale_time / (1 + PCV_ratio)
+                t_wait_down = inhale_time / (1 + 1 / PCV_ratio)
+                t_move_up = tgt_per - t_move_down - t_wait_down
 
                 # Defines how long each cycle takes, enabling the volume control
-                t_move_up = tgt_per - t_move_down
-                t_wait_up = 0
-                t_wait_down = 0
+                # t_move_up = tgt_per - t_move_down
+                # t_wait_up = 0
+                # t_wait_down = 0
                # self.pst_dir = 0
 
             elif self.mode == 2:  # 'PCV'
@@ -320,9 +442,10 @@ class ControlPiston(QtCore.QObject):
                     self.pst_dir = 2
 
             else:  # STOP
+                pass
                 # Does not move, just waits and continues to the next cycle
-                time.sleep(0.5)
-                continue
+                # time.sleep(0.05)
+                # continue
 
             # After the configuration of the cycle times, perform the movement
             if self.mode in [1, 2, 3]:
@@ -361,6 +484,14 @@ class ControlPiston(QtCore.QObject):
                 else:  # Should do nothing
                     #print("do nothing")
                     continue
+
+            # Emergency mode
+            elif self.mode == 4:
+                self.piston.emergency()
+
+            # Stop
+            else:
+                self.piston.stop()
 
             # Calculating how long the inhale and exhale took
             if self.pst_dir == 0:  # The up cycle has just ended
@@ -402,7 +533,7 @@ class InterfaceControl(QtCore.QObject):
         while(True):
             # If the queue is empty, skips to the next block
             if self.input_q.empty():
-                time.sleep(0.1)
+                time.sleep(0.01)
                 continue
             # key gets from the queue a list with the name of the key and the time it was pressed
             key = self.input_q.get()
@@ -439,10 +570,10 @@ class BuzBuzzer(QtCore.QObject):
         self.buzzer = buzzer()
         
     def short_buzz(self):
-        self.buzzer.beep_for(0.1)
+        self.buzzer.beep_for(0.05)
 
     def long_buzz(self):
-        self.buzzer.beep_for(0.5)
+        self.buzzer.beep_for(0.3)
 
 class LEDControl(QtCore.QObject):
     """
@@ -483,7 +614,6 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
         # Starting the graphs and threads
         self.create_graphs()
         self.create_threads()
-
 
         # Creates a timer to update the graphs at some period
         self.timer = QtCore.QTimer()
@@ -638,7 +768,9 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
             lambda: self.change_value(self.al_volume_minute_max_spb, "-"))
 
         # Configuration tab
-        self.cfg_tare_btn.clicked.connect(lambda: self.set_tare_var(5))
+        self.cfg_tare_btn.clicked.connect(lambda: self.set_tare_var(self.cfg_tare_spb.value()))
+        self.cfg_tare_plus_btn.clicked.connect(lambda: self.change_value(self.cfg_tare_spb, "+"))
+        self.cfg_tare_minus_btn.clicked.connect(lambda: self.change_value(self.cfg_tare_spb, "-"))
 
     def create_graphs(self):
         # Definitions to create the graphs
@@ -717,11 +849,11 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
         self.vol_pw.setXRange(self.time_range[0], self.time_range[1], self.padding)
         self.vol_graph = self.vol_pw.plot(self.vol_data[0, :], self.vol_data[1, :], pen=plot_pen)
         # Adding text inside the graph
-        self.vol_lbl.setText("TEST")
+        # self.vol_lbl.setText("TEST")
         # Anchor is the position to which the text will refer in setPos
-        self.vol_lbl.setAnchor((1, 1))
+        # self.vol_lbl.setAnchor((1, 1))
         # This is the position of the anchor, in the coordinates of the graph
-        self.vol_lbl.setPos(0.0, 0.0)
+        # self.vol_lbl.setPos(0.0, 0.0)
         self.run_counter = 0
         self.get_tare = False
 
@@ -813,8 +945,11 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
         """
         self.tare_duration = tare_duration
         self.get_tare = True
-        self.worker_led.blink()
-        self.worker_buzzer.long_buzz()
+        # beep and blink after 100 ms
+        if self.cfg_beep_chkBox.isChecked():
+            QtCore.QTimer.singleShot(100, lambda: self.worker_buzzer.long_buzz())
+        if self.cfg_led_chkBox.isChecked():
+            QtCore.QTimer.singleShot(100, lambda: self.worker_led.blink())
 
     # try to use this funtion without having to create a new instance every cycle
     def update_graphs(self):
@@ -895,9 +1030,12 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
                 last_inhale = 3
             # Gets the indexes of the data since the last breath
             i_li = np.where(now - self.flw_data[0, :] < last_inhale)[0]
-            volume = np.sum(self.flw_data[1, i_li]) / (60 * last_inhale)
-            # Converting the volume from L to mL
-            volume = 1000 * volume
+            # volume = np.sum(self.flw_data[1, i_li]) / (60 * last_inhale)
+            # Integrating the flow with trapz to get accurate results, considering the dt is not 
+            # constant between samples. The time is negative, so needs to invert the signal
+            volume = -integrate.trapz(self.flw_data[1, i_li], self.flw_data[0, i_li])
+            # Converting the volume from L to mL and time from minute to second
+            volume = 1000 * volume / 60
             self.vol_data = np.roll(self.vol_data, 1)
             self.vol_data[:, 0] = (self.flw_data[0, 0], volume)
             i_tr_vol = np.where(now - self.vol_data[0, :] < 
@@ -909,10 +1047,6 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
             # Updates the data that is given to the piston function
             self.worker_piston.vol_data = self.vol_data
 
-            mean_pts = 10
-            FPS = np.nan_to_num(1.0 / np.mean(self.vol_data[0, 0:mean_pts] - 
-                                self.vol_data[0, 1:1+mean_pts]))
-            self.vol_lbl.setText(f"FPS: {FPS:.2f}")
 
             if profile_time == True:
                 time_at_volume = time.time()
@@ -921,7 +1055,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
         # Adjust the Y range every N measurements
         # Manually adjusting by calculating the max and min with numpy is faster than 
         # autoscale on the graph
-        
+        # Also calculates FPS
         N = 20
         if self.run_counter % N == 0:
             # definition of the minimum acceptable range for the volume
@@ -949,6 +1083,10 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
                                     np.max([range_flw[1], min_range_flw[1]]))
             except:
                 pass
+            mean_pts = 50
+            FPS = np.nan_to_num(1.0 / np.mean(self.vol_data[0, 0:mean_pts] - 
+                                self.vol_data[0, 1:1+mean_pts]))
+            self.fps_lbl.setText(f"FPS: {FPS:.2f}")
             self.run_counter = 0
         self.run_counter += 1
 
@@ -1021,6 +1159,8 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
         self.al_apnea_min_spb.setValue(self.conf["Alarms"].getfloat("apnea_min"))
         self.al_apnea_max_spb.setValue(self.conf["Alarms"].getfloat("apnea_max"))
         self.al_apnea_chkBox.setChecked(self.conf["Alarms"].getboolean("apnea_on"))
+        # Config Tab
+        self.cfg_tare_spb.setValue(self.conf['Config'].getfloat("tare"))
 
         # Always shown elements
         self.inhale_time_val.setText("0,0 s")
@@ -1039,8 +1179,8 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
         c_tab = self.tabWidget.currentIndex()
         tab_content = {0:[self.VCV_frequency_spb,
                           self.VCV_pressure_max_spb,
-                          self.VCV_volume_max_spb,
                           self.VCV_volume_min_spb,
+                          self.VCV_volume_max_spb,
                           self.VCV_inhale_pause_spb],
                        1:[self.PCV_frequency_spb,
                           self.PCV_pressure_spb,
@@ -1049,6 +1189,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
                           self.PCV_inhale_pause_spb],
                        2:[self.PSV_pressure_spb,
                           self.PSV_sensitivity_spb,
+                          self.PSV_inhale_time_spb,
                           self.PSV_inhale_pause_spb],
                        3:[self.al_tidal_volume_min_spb,
                           self.al_tidal_volume_max_spb,
@@ -1065,7 +1206,8 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
                           self.al_frequency_min_spb,
                           self.al_frequency_max_spb,
                           self.al_apnea_min_spb,
-                          self.al_apnea_max_spb]}
+                          self.al_apnea_max_spb],
+                       4:[self.cfg_tare_spb]}
         # By default will choose the first spinbox on the current tab.
         current_spb = tab_content[c_tab][1]
         # Going through the spinboxes of the current tab and checking whether they have the focus
@@ -1075,15 +1217,31 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
                 continue
 
         if action == "UP":
+            if self.cfg_beep_chkBox.isChecked():
+                QtCore.QTimer.singleShot(1, lambda: self.worker_buzzer.short_buzz())
+            if self.cfg_led_chkBox.isChecked():
+                QtCore.QTimer.singleShot(1, lambda: self.worker_led.blink())
             self.change_value(current_spb, "+")
         elif action == "DOWN":
+            if self.cfg_beep_chkBox.isChecked():
+                QtCore.QTimer.singleShot(1, lambda: self.worker_buzzer.short_buzz())
+            if self.cfg_led_chkBox.isChecked():
+                QtCore.QTimer.singleShot(1, lambda: self.worker_led.blink())
             self.change_value(current_spb, "-")
         elif action == "OK":
+            if self.cfg_beep_chkBox.isChecked():
+                QtCore.QTimer.singleShot(1, lambda: self.worker_buzzer.short_buzz())
+            if self.cfg_led_chkBox.isChecked():
+                QtCore.QTimer.singleShot(1, lambda: self.worker_led.blink())
             # Put the next spinbox in focus
             nxt = tab_content[c_tab][(tab_content[c_tab].index(current_spb) + 1) % 
                                      len(tab_content[c_tab])]
             nxt.setFocus()
         elif action == "ROT":
+            if self.cfg_beep_chkBox.isChecked():
+                QtCore.QTimer.singleShot(1, lambda: self.worker_buzzer.short_buzz())
+            if self.cfg_led_chkBox.isChecked():
+                QtCore.QTimer.singleShot(1, lambda: self.worker_led.blink())
             # Put the next spinbox in focus
             nxt = tab_content[c_tab][(tab_content[c_tab].index(current_spb) + 1) %
                                      len(tab_content[c_tab])]
@@ -1121,6 +1279,9 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
         elif tab_code == "al":
             conf_section = "Alarms"
             remove_chars = 7
+        elif tab_code == "cfg":
+            conf_section = "Config"
+            remove_chars = 3
         # It should never reach the "else", but still here it is, if something fails
         else:
             print("Tab code " + tab_code + " is not valid")

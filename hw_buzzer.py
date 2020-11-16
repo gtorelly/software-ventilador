@@ -21,10 +21,7 @@ class buzzer():
 
     def beep_for(self, duration):
         GPIO.output(self.buz_pin, 1)
-        # time.sleep(duration)
-        # QtCore.QThread.sleep(1)
         QtCore.QTimer.singleShot(1000 * duration, lambda: GPIO.output(self.buz_pin, 0))
-        # GPIO.output(self.buz_pin, 0)
 
 
 
