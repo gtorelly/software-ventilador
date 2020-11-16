@@ -155,7 +155,7 @@
            <enum>Qt::WheelFocus</enum>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>4</number>
           </property>
           <widget class="QWidget" name="VCV_tab">
            <attribute name="title">
@@ -5031,14 +5031,14 @@
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="beep_chkBox">
+             <widget class="QCheckBox" name="cfg_beep_chkBox">
               <property name="text">
                <string>Beep</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="led_chkBox">
+             <widget class="QCheckBox" name="cfg_led_chkBox">
               <property name="text">
                <string>LED</string>
               </property>
@@ -5445,8 +5445,8 @@
   <tabstop>cfg_tare_spb</tabstop>
   <tabstop>cfg_tare_minus_btn</tabstop>
   <tabstop>cfg_tare_plus_btn</tabstop>
-  <tabstop>beep_chkBox</tabstop>
-  <tabstop>led_chkBox</tabstop>
+  <tabstop>cfg_beep_chkBox</tabstop>
+  <tabstop>cfg_led_chkBox</tabstop>
  </tabstops>
  <resources/>
  <connections/>
