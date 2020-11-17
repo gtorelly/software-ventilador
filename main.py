@@ -10,14 +10,7 @@ from queue import Queue
 from scipy import integrate
 import sys
 import time
-
-# Hardware control files
-from hw_adc_pressure import pressure_gauge
-# from hw_flowmeter import flowmeter
-from hw_piston import pneumatic_piston
-from hw_buttons import Buttons
-from hw_buzzer import buzzer
-from hw_led import led
+from hardware import pressure_gauge, pneumatic_piston, buttons, buzzer, led
 
 class ReadSensors(QtCore.QObject):
     """
@@ -522,43 +515,120 @@ class InterfaceControl(QtCore.QObject):
         super().__init__()
         # Classes that creates the instances of IO classes
         self.input_q = Queue()
-        self.btns = Buttons(self.input_q)
+        self.btns = buttons(self.input_q)
 
     def read_queue(self):
         key = None
         prev_key = [0, 0]
-        # usually the difference between correct signals is in the range of 40 ms
+        # usually the difference between correct signals is in the range of 40-80 ms
+        dt_min = 10E-3
         dt_max = 100E-3
-        dt_min = 3E-6
+
         while(True):
-            # If the queue is empty, skips to the next block
+            # If the queue is empty, skips to the next run
             if self.input_q.empty():
-                time.sleep(0.01)
+                time.sleep(0.05)
                 continue
+
             # key gets from the queue a list with the name of the key and the time it was pressed
             key = self.input_q.get()
             self.input_q.task_done()
-            if key[0] == "clk":
+
+            # The non-rotary signals don't need special treatment, just emit them
+            if key[0] in ["UP", "DOWN", "OK", "ROT"]:
+                self.signal_button.emit(key[0])
+                prev_key = key
+
+            elif key[0] == "clk":
+                # print("clk")
                 dt = key[1] - prev_key[1]
-                # Doesn'
-                if prev_key[0] == "dt" and dt < dt_max and dt > dt_min:
-                    # print(f"Interval = {1000 * (key[1] - prev_key[1]):.3f} ms - CCW")
+                if prev_key[0] == "dt" and dt > dt_min and dt < dt_max:
+                    print(f"Interval = {1000 * (key[1] - prev_key[1]):.3f} ms - CCW")
                     self.signal_button.emit("CCW")
                     prev_key = [0, 0]
                 else:
                     prev_key = key
 
             elif key[0] == "dt":
+                # print("dt")
                 dt = key[1] - prev_key[1]
-                if prev_key[0] == "clk" and dt < dt_max and dt > dt_min:
-                    # print(f"Interval = {1000 * (key[1] - prev_key[1]):.3f} ms - CW")
+                if prev_key[0] == "clk" and dt > dt_min and dt < dt_max:
+                    print(f"Interval = {1000 * (key[1] - prev_key[1]):.3f} ms - CW")
                     self.signal_button.emit("CW")
                     prev_key = [0, 0]
                 else:
                     prev_key = key
+            
+            else:
+                print("Key not configured")
 
-            elif key[0] in ["UP", "DOWN", "OK", "ROT"]:
+    def read_queue_state(self):
+        key = None
+        prev_key = [0, 0]
+        # usually the difference between correct signals is in the range of 40-80 ms
+        dt_min = 5E-6
+        dt_max = 150E-3
+        state = "idle"
+        last_clk = 0
+        last_dt = 0
+
+        while(True):
+            # If the queue is empty, skips to the next run
+            if self.input_q.empty():
+                time.sleep(0.05)
+                continue
+
+            # key gets from the queue a list with the name of the key and the time it was pressed
+            key = self.input_q.get()
+            self.input_q.task_done()
+
+            # First there is the decision tree to determine the current state after the input
+            # The non-rotary signals don't need special treatment, just emit them
+            if key[0] in ["UP", "DOWN", "OK", "ROT"]:
                 self.signal_button.emit(key[0])
+                state = "idle"
+
+            elif state == "idle":
+                if key[0] == "clk":
+                    last_clk = key[1]
+                    state = "got_clk_1"
+                elif key[0] == "dt":
+                    last_dt = key[1]
+                    state = "got_dt_1"
+                else:
+                    pass
+
+            elif state == "got_clk_1":
+                if key[0] == "clk":
+                    last_clk = key[1]
+                    state = "got_clk_1"
+                elif key[0] == "dt":
+                    last_dt = key[1]
+                    delta_t = last_dt - last_clk
+                    if dt_min < delta_t < dt_max:
+                        state = "idle"
+                        print(f"Interval = {1000 * (delta_t):.3f} ms - CW")
+                        self.signal_button.emit("CW")
+                    else:
+                        state = "got_dt_1"
+                else:
+                    pass
+
+            elif state == "got_dt_1":
+                if key[0] == "dt":
+                    last_dt = key[1]
+                    state = "got_dt_1"
+                elif key[0] == "clk":
+                    last_clk = key[1]
+                    delta_t = last_clk - last_dt 
+                    if dt_min < delta_t < dt_max:
+                        state = "idle"
+                        print(f"Interval = {1000 * (delta_t):.3f} ms - CCW")
+                        self.signal_button.emit("CCW")
+                    else:
+                        state = "got_clk_1"
+                else:
+                    pass
 
 class BuzBuzzer(QtCore.QObject):
     """
@@ -925,7 +995,7 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
         self.thread_buttons = QtCore.QThread()
         self.worker_buttons.moveToThread(self.thread_buttons)
         self.worker_buttons.signal_button.connect(self.spinbox_control)
-        self.thread_buttons.started.connect(self.worker_buttons.read_queue)
+        self.thread_buttons.started.connect(self.worker_buttons.read_queue_state)
         self.thread_buttons.start()
 
         # Buzzer thread
