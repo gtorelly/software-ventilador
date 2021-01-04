@@ -58,7 +58,7 @@ class pressure_gauge():
         self.flw_channel = 3
         self.flw_gain = 16
         self.flw_volt_max = self.gains[self.flw_gain]
-        self.flw_volt_offset = 0
+        self.flw_volt_offset = 0.0274
 
     def read_volts(self, ch, gain, adc_max, volt_max, mode):
         """
@@ -89,14 +89,39 @@ class pressure_gauge():
         Function that converts the sensors voltage to a pressure difference, then to an 
         airflow based on the conversion equation of the orifice flow meter.
         """
+        # reads the raw voltage from the adc
         volts = self.read_volts(self.flw_channel, self.flw_gain, self.adc_read_max,
                                 self.flw_volt_max, "differential")
+
         # print(f"flow volts: {volts:.5f}")
-        # Pressure sensor and orifice parameters used to obtain the flow
         offset = 0.0274
-        beta = 1000 # TEMPORARY, the real equation is much more complex
-        flow = (volts - self.flw_volt_offset) * beta
-        # print(flow)
+
+        # delta_p must be in N / m² (Pa)
+        # The full span of the sensor is 35 mV, corresponding to 10 kPa
+        delta_p = (volts - self.flw_volt_offset) * 10000 / 0.035  # Pressure in Pa
+        flow_dir = 1
+        if delta_p < 0:
+            flow_dir = -1
+
+
+        # Pressure sensor and orifice parameters used to obtain the flow
+        # Diameters of the orifice tube and ratio (beta)
+        D_1 = 0.0185  # m
+        D_2 = 0.0040  # m
+        A_1 = np.pi * (D_1 / 2) * (D_1 / 2)
+        A_2 = np.pi * (D_2 / 2) * (D_2 / 2)
+        C_D = A_2 / A_1  # Area ratio
+        d = D_2 / D_1  # Diameter ration
+        # The air density must be calculated taking into account the air temperature and humidity,
+        # therefore it is necessary to buy another sensor for this application.
+        rho = 1.2
+
+        # q is the flow in m³/s
+        q = C_D * (np.pi / 4.0) * (D_2 ** 2.0) * (2.0 * delta_p * flow_dir /
+                                                  (rho * ((1.0 - d) ** 4.0))) ** 0.5 
+        # Converting to l / minute
+        flow = q * 60000 * flow_dir
+        # print(f"mV: {1000 * volts:.2f}")
         return flow  # flow in liters per minute
 
     def tare_sensors(self, duration):
@@ -215,15 +240,24 @@ class pneumatic_piston():
         # Assigning pin numbers and setting them to zero
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BOARD)  # defines pin numbers as physical numbering on board, not GPIOXX
-        GPIO.setup(self.pin_down,GPIO.OUT) 
-        GPIO.setup(self.pin_up,GPIO.OUT)
-        GPIO.setup(self.pin_sensor_down,GPIO.IN) 
-        GPIO.setup(self.pin_sensor_up,GPIO.IN)
-        GPIO.output(self.pin_down, 0) #garantir zero p/pistao descida
-        GPIO.output(self.pin_up, 0) #garantir zero p/pistao subida
+        GPIO.setup(self.pin_down, GPIO.OUT) 
+        GPIO.setup(self.pin_up, GPIO.OUT)
+        GPIO.setup(self.pin_sensor_down, GPIO.IN, pull_up_down=GPIO.PUD_UP) 
+        GPIO.setup(self.pin_sensor_up, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.output(self.pin_down, 0)  # garantir zero p/pistao descida
+        GPIO.output(self.pin_up, 0)  # garantir zero p/pistao subida
 
         # In case the movement doesn't complete in this amount of time, stop
         self.timeout = 10000  # ms
+
+        # Variables that register the piston position
+        self.piston_at_bottom = False
+        self.piston_at_top = False
+        # Configuring the interrupts that will define 
+        GPIO.add_event_detect(self.pin_sensor_down, GPIO.RISING, 
+                              callback=lambda x:self.position_sensor("down"))
+        GPIO.add_event_detect(self.pin_sensor_up, GPIO.RISING, 
+                              callback=lambda x:self.position_sensor("up"))
         
     def piston_down(self, duration):
         """
@@ -277,6 +311,9 @@ class pneumatic_piston():
         return 'top'
 
     def emergency(self):
+        """
+        Moves the piston up in an emergency
+        """
          # Send the piston up
          GPIO.output(self.pin_up, 1)
          GPIO.output(self.pin_down, 0)
@@ -284,6 +321,38 @@ class pneumatic_piston():
          QtCore.QTimer.singleShot(10000, lambda: GPIO.output(self.pin_up, 0))
 
     def stop(self):
-        # shuts down both outputs
+        """
+        Stops the piston by disabling both solenoids
+        """
         GPIO.output(self.pin_up, 0)
         GPIO.output(self.pin_down, 0)
+
+    def pst_down(self):
+        """
+        Simple function that turns on the solenoid making the piston go down.
+        """
+        # if GPIO.input(self.pin_sensor_down) == True:
+        #     # The piston is already at the bottom.
+        #     return 'bottom'
+        GPIO.output(self.pin_up, 0)  # Guarantees the piston is not going up 
+        GPIO.output(self.pin_down, 1)  # Makes the piston go down
+        self.piston_at_top = False  # If the piston is going down, its not at the top
+
+    def pst_up(self):
+        """
+        Simple function that turns on the solenoid making the piston go up.
+        """
+        GPIO.output(self.pin_down, 0)  # Guarantees the piston is not going down
+        GPIO.output(self.pin_up, 1)  # Makes the piston go up
+        self.piston_at_bottom = False  # If the piston is going up, it's not at the bottom
+        
+    def position_sensor(self, sens):
+        """
+        Function called by interrupts to define the position of the piston.
+        """
+        if sens == "down":
+            self.piston_at_bottom = True
+            self.piston_at_top = False
+        else:
+            self.piston_at_bottom = False
+            self.piston_at_top = True

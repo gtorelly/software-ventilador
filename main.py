@@ -121,80 +121,173 @@ class ControlPiston(QtCore.QObject):
         time.sleep(0.5)
         self.controller()
 
-    def running_controller(self):
+    def piston_control(self):
         """
-        Controlling the piston movement timing without sleeps. Runs continuously checking whether 
-        a long enough time has passed since the last moment. Calculates the appropriate timing based
-        on the current mode.
-        This function is the third attempt at improving the piston control method.
+        Function that follows simple cycles to control the piston, based on live feedback from the
+        sensors and inputs from the interface.
         """
-        # Creating variables used to run the loop continuously
-        last_inhale_t = time.time()
-        last_exhale_t = last_inhale_t + 1
-        next_inhale_t = last_exhale_t + 1
-        next_exhale_t = next_inhale_t + 1
-        next_move = "inhale"
-
-        # Working loop
+        t_last = 0
+        inhale_end = time.time() - 1
         while True:
             now = time.time()
-            # After the configuration of the cycle times, perform the movement
-            # VCV or PCV
-            if self.mode in [1, 2]:
-                # If the next movement is inhale and sufficient time has passed, inhale
-                if next_move == "inhale" and now > next_inhale_t:
-                    # move 
-                    self.pst_pos = self.piston.piston_down(t_move_down)
-                    
-                    # calculate the instant of the next inhale
+            P = self.prs_data[1, -1]
+            V = self.vol_data[1, -1]
+            tgt_per = 60. / self.gui["VCV_frequency_spb"].value()
+            V_tgt = self.gui["VCV_volume_max_spb"].value()
+            T_inh_max = 1  # Needs to be obtained from the interface
 
-                    
-                    next_move = "exhale"
+            if self.mode == 1:  # 'VCV'
+                # If it's time for a new cycle, volume and pressure are within limits
+                if (time.time() > t_last + 60. / self.gui["VCV_frequency_spb"].value()
+                    and self.vol_data[1, -1] < self.gui["VCV_volume_max_spb"].value()
+                    and self.prs_data[1, -1] < self.gui["VCV_pressure_max_spb"].value()):
+                    compress = True
+                    inhale_start = time.time()
+                    # It is possible to calculate how long the last exhale took
+                    self.cd["exhale_time"] = inhale_start - inhale_end
+                    while compress == True:  # Cycle starts, compress the Ambu
+                        self.piston.pst_down()  # Starts the movement down
+                        # Checks if the current volume is above target
+                        if self.vol_data[1, -1] >= self.gui["VCV_volume_max_spb"].value():
+                            compress = False
 
+                        # Checks if the current pressure is above P_max
+                        if self.prs_data[1, -1] >= self.gui["VCV_pressure_max_spb"].value():
+                            compress = False
+                            pressure_too_high = True
 
-                if next_move == "exhale" and now > next_exhale_t:
-                    next_move = "inhale"
-                move_start = time.time()
-                self.cd["inhale_instant"] = move_start
-                if self.pst_dir == 0:  # Should move down
-                    # the movement will last a maximum of "t_move_down"
-                    self.pst_pos = self.piston.piston_down(t_move_down)
-                    # Waits until t_move_down is completed, in case the piston descended faster
-                    move_down_dur = time.time() - move_start
-                    if move_down_dur < t_move_down:
-                        time.sleep(t_move_down - move_down_dur)
-                    # If the pause button was pressed, pauses 
-                    if self.pause == True:
-                        time.sleep(self.pause_duration)
-                        t_wait_down = t_wait_down - self.pause_duration
-                        self.pause = False
-                    # if the piston needs to wait in the down position
-                    if t_wait_down > 0:
-                        time.sleep(t_wait_down)
-                    self.pst_dir = 1
-                    down_cycle_end = time.time()
-                
-                elif self.pst_dir == 1:  # Should move up
-                    self.pst_pos = self.piston.piston_up(t_move_up)
-                    move_up_dur = time.time() - move_start
-                    # If this movement was faster than the expected duration, wait
-                    if move_up_dur < t_move_up:
-                        time.sleep(t_move_up - move_up_dur)
-                    # if the piston needs to wait in the up position
-                    if t_wait_up > 0:
-                        time.sleep(t_wait_up)
-                    self.pst_dir = 0
-                    up_cycle_end = time.time()
-            # PSV
-            elif self.mode == 3:
-                pass
-            # Emergency mode
-            elif self.mode == 4:
+                        if time.time() >= T_inh_max + inhale_start:  # Checks if it reached the maximum inhale t
+                            compress = False
+                            cycle_too_long = True
+
+                        if self.piston.piston_at_bottom:  # Checks whether the piston reached the bottom
+                            compress = False
+                            cycle_too_long = True
+                    inhale_end = time.time()
+                    # It is possible to calculate how long the last inhale took
+                    self.cd["exhale_time"] = inhale_end - inhale_start
+                    if pressure_too_high:
+                        print("Pressure is too high!")
+                            pressure_too_high = False
+                    if cycle_too_long:
+                        print("Cycle is too long!")
+                        cycle_too_long = False
+                    # While the piston still hasn't reached the top
+                    while not self.piston.piston_at_top:
+                        self.piston.pst_up()
+                    t_last = cycle_start
+
+            elif self.mode == 2:  # 'PCV'
+                # If it's time for a new cycle, volume and pressure are within limits
+                if (time.time() > t_last + 60. / self.gui["PCV_frequency_spb"].value()
+                    and self.vol_data[1, -1] < self.gui["PCV_volume_max_spb"].value()
+                    and self.prs_data[1, -1] < self.gui["PCV_pressure_spb"].value()):
+                    compress = True
+                    cycle_start = time.time()
+                    while compress == True:  # Cycle starts, compress the Ambu
+                        self.piston.pst_down()  # Starts the movement down
+                        # Checks if the current pressure is above target
+                        if self.prs_data[1, -1] >= self.gui["PCV_pressure_spb"].value():
+                            compress = False
+
+                        # Checks if the current volume is above maximum
+                        if self.vol_data[1, -1] >= self.gui["PCV_volume_max_spb"].value():
+                            compress = False
+                            volume_too_high = True
+
+                        # Checks if it reached the maximum inhale t
+                        if time.time() >= T_inh_max + cycle_start:  
+                            compress = False
+                            cycle_too_long = True
+
+                        # Checks whether the piston reached the bottom
+                        if self.piston.piston_at_bottom:  
+                            compress = False
+                            cycle_too_long = True
+                    if volume_too_high:
+                        print("Volume is too high!")
+                            volume_too_high = False
+                    if cycle_too_long:
+                        print("Cycle is too long!")
+                        cycle_too_long = False
+                    # While the piston still hasn't reached the top
+                    while not self.piston.piston_at_top:
+                        self.piston.pst_up()
+                    t_last = cycle_start
+
+            elif self.mode == 3:  # 'PSV'
+                # If it's time for a new cycle, volume and pressure are within limits
+                if (self.prs_data[1, -1] < self.gui["PSV_sensitivity_spb"].value()):
+                    compress = True
+                    cycle_start = time.time()
+                    while compress == True:  # Cycle starts, compress the Ambu
+                        self.piston.pst_down()  # Starts the movement down
+                        # Checks if the current pressure is above target
+                        if self.prs_data[1, -1] >= self.gui["PSV_pressure_spb"].value():
+                            compress = False
+
+                        # Checks if the current volume is above maximum
+                        if self.vol_data[1, -1] >= self.gui["PCV_volume_max_spb"].value():
+                            compress = False
+                            volume_too_high = True
+
+                        # Checks if it reached the maximum inhale t
+                        if time.time() >= T_inh_max + cycle_start:  
+                            compress = False
+                            cycle_too_long = True
+
+                        # Checks whether the piston reached the bottom
+                        if self.piston.piston_at_bottom:  
+                            compress = False
+                            cycle_too_long = True
+                    if volume_too_high:
+                        print("Volume is too high!")
+                            volume_too_high = False
+                    if cycle_too_long:
+                        print("Cycle is too long!")
+                        cycle_too_long = False
+                    # While the piston still hasn't reached the top
+                    while not self.piston.piston_at_top:
+                        self.piston.pst_up()
+                    t_last = cycle_start
+
+                        # Emergency mode
+            
+            elif self.mode == 4:  # 'Emergency'
                 self.piston.emergency()
 
-            # Stop
-            else:
+            else:  # Stop
                 self.piston.stop()
+
+            # Finds the indexes of data from the last cycle for flow and pressure
+            i_flw = np.where(time.time() - self.flw_data[0, :] < last_cycle_dur)[0]
+            i_prs = np.where(time.time() - self.prs_data[0, :] < last_cycle_dur)[0]
+            
+            # Sends the maximum pressure and volume in the last cycle to the interface
+            # This try-except logic is just to avoid a problem when the max of an empty array is 
+            # calculated, leading to an error.
+            try:
+                peak_prs = np.max(self.prs_data[1, i_prs])
+            except:
+                peak_prs = 0
+            try:
+                peak_flw = np.max(self.flw_data[1, i_flw])
+            except:
+                peak_flw = 0
+            try:
+                peak_vol = np.max(self.vol_data[1, i_flw])
+            except:
+                peak_vol = 0
+            # Calculating the I:E ratio
+            ratio = exhale_time / inhale_time
+            self.cd["IE_ratio"] = self.cd["exhale_time"] / self.cd["inhale_time"]
+            # Saving the data for the GUI update
+            self.cd["peak_pressure"] = peak_prs
+            self.cd["tidal_volume"] = peak_vol
+            self.signal_cycle_data.emit(self.cd)
+                    
+
+
 
     def controller(self):
         """
