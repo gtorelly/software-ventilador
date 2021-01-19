@@ -6,7 +6,7 @@ import numpy as np
 import os
 from PyQt5 import QtWidgets, QtCore, uic
 import pyqtgraph as pg
-from queue import Queue
+from queue import Queue, LifoQueue
 from scipy import integrate
 import sys
 import time
@@ -62,13 +62,16 @@ class ControlPiston(QtCore.QObject):
     signal_startup_error = QtCore.pyqtSignal(bool)
     signal_get_tare = QtCore.pyqtSignal(float)
     
-    def __init__(self, gui, mode):
+    def __init__(self, gui, flw_lifo_q, prs_lifo_q, vol_lifo_q, mode):
         super().__init__()
         # receives the piston instance from the call of this worker in the main window
         # assigns the instance to another with the same name.
         self.piston = pneumatic_piston()
         self.stop = False
         self.gui = gui
+        self.flw = flw_lifo_q
+        self.prs = prs_lifo_q
+        self.vol = vol_lifo_q
         self.mode = 0
         self.pause = False
         self.pause_duration = 1
@@ -92,15 +95,20 @@ class ControlPiston(QtCore.QObject):
         self.cd["inhale_time"] = 0
         self.cd["exhale_time"] = 0
         self.cd["IE_ratio"] = 1
+
         to = 3  # Timeout
         startup_cycles = 0
         limit = 20
-        while self.pst_pos != "top":
+        # If the piston position is unknown
+        while not self.piston.piston_at_bottom and not self.piston.piston_at_top:
+            t_start = time.time()
             if self.pst_dir == 1:
-                self.pst_pos = self.piston.piston_up(to)
+                while t_start + to > time.time() and not self.piston.piston_at_top: 
+                    self.pst_pos = self.piston.pst_up()
                 self.pst_dir = 0
             else:
-                self.pst_pos = self.piston.piston_down(to)
+                while t_start + to > time.time() and not self.piston.piston_at_bottom:
+                    self.pst_pos = self.piston.pst_down()
                 self.pst_dir = 1
             startup_cycles += 1
             if startup_cycles >= limit:
@@ -109,6 +117,10 @@ class ControlPiston(QtCore.QObject):
                 # Breaks the loop so that the controller doesn't start
                 self.signal_startup_error.emit(True)
                 return
+        while not self.piston.piston_at_top:
+            self.pst_pos = self.piston.pst_up()
+        self.piston.stop()
+
         print(f"startup_cycles: {startup_cycles}")
         self.cd["started_up"] = True
         self.signal_cycle_data.emit(self.cd)
@@ -119,7 +131,7 @@ class ControlPiston(QtCore.QObject):
         # Waits a little bit just to make sure that the respirator isn't working when the controller 
         # is called
         time.sleep(0.5)
-        self.controller()
+        self.piston_control()
 
     def piston_control(self):
         """
@@ -130,8 +142,17 @@ class ControlPiston(QtCore.QObject):
         inhale_end = time.time() - 1
         while True:
             now = time.time()
-            P = self.prs_data[1, -1]
-            V = self.vol_data[1, -1]
+            # Gets the newest data and empties que queues
+            if not self.prs.empty():
+                t_P, P = self.prs.get()
+                while not self.prs.empty():
+                    dump = self.prs.get()
+
+            if not self.vol.empty():
+                t_V, V = self.vol.get()
+                while not self.vol.empty():
+                    dump = self.vol.get()
+
             tgt_per = 60. / self.gui["VCV_frequency_spb"].value()
             V_tgt = self.gui["VCV_volume_max_spb"].value()
             T_inh_max = 1  # Needs to be obtained from the interface
@@ -139,8 +160,8 @@ class ControlPiston(QtCore.QObject):
             if self.mode == 1:  # 'VCV'
                 # If it's time for a new cycle, volume and pressure are within limits
                 if (time.time() > t_last + 60. / self.gui["VCV_frequency_spb"].value()
-                    and self.vol_data[1, -1] < self.gui["VCV_volume_max_spb"].value()
-                    and self.prs_data[1, -1] < self.gui["VCV_pressure_max_spb"].value()):
+                    and V < self.gui["VCV_volume_max_spb"].value()
+                    and P < self.gui["VCV_pressure_max_spb"].value()):
                     compress = True
                     inhale_start = time.time()
                     # It is possible to calculate how long the last exhale took
@@ -148,19 +169,19 @@ class ControlPiston(QtCore.QObject):
                     while compress == True:  # Cycle starts, compress the Ambu
                         self.piston.pst_down()  # Starts the movement down
                         # Checks if the current volume is above target
-                        if self.vol_data[1, -1] >= self.gui["VCV_volume_max_spb"].value():
+                        if V >= self.gui["VCV_volume_max_spb"].value():
                             compress = False
 
                         # Checks if the current pressure is above P_max
-                        if self.prs_data[1, -1] >= self.gui["VCV_pressure_max_spb"].value():
+                        if P >= self.gui["VCV_pressure_max_spb"].value():
                             compress = False
                             pressure_too_high = True
-
-                        if time.time() >= T_inh_max + inhale_start:  # Checks if it reached the maximum inhale t
+                        # Checks if it reached the maximum inhale t
+                        if time.time() >= T_inh_max + inhale_start:  
                             compress = False
                             cycle_too_long = True
-
-                        if self.piston.piston_at_bottom:  # Checks whether the piston reached the bottom
+                        # Checks whether the piston reached the bottom      
+                        if self.piston.piston_at_bottom:  
                             compress = False
                             cycle_too_long = True
                     inhale_end = time.time()
@@ -168,7 +189,7 @@ class ControlPiston(QtCore.QObject):
                     self.cd["exhale_time"] = inhale_end - inhale_start
                     if pressure_too_high:
                         print("Pressure is too high!")
-                            pressure_too_high = False
+                        pressure_too_high = False
                     if cycle_too_long:
                         print("Cycle is too long!")
                         cycle_too_long = False
@@ -180,18 +201,18 @@ class ControlPiston(QtCore.QObject):
             elif self.mode == 2:  # 'PCV'
                 # If it's time for a new cycle, volume and pressure are within limits
                 if (time.time() > t_last + 60. / self.gui["PCV_frequency_spb"].value()
-                    and self.vol_data[1, -1] < self.gui["PCV_volume_max_spb"].value()
-                    and self.prs_data[1, -1] < self.gui["PCV_pressure_spb"].value()):
+                    and V < self.gui["PCV_volume_max_spb"].value()
+                    and P < self.gui["PCV_pressure_spb"].value()):
                     compress = True
                     cycle_start = time.time()
                     while compress == True:  # Cycle starts, compress the Ambu
                         self.piston.pst_down()  # Starts the movement down
                         # Checks if the current pressure is above target
-                        if self.prs_data[1, -1] >= self.gui["PCV_pressure_spb"].value():
+                        if P >= self.gui["PCV_pressure_spb"].value():
                             compress = False
 
                         # Checks if the current volume is above maximum
-                        if self.vol_data[1, -1] >= self.gui["PCV_volume_max_spb"].value():
+                        if V >= self.gui["PCV_volume_max_spb"].value():
                             compress = False
                             volume_too_high = True
 
@@ -206,7 +227,7 @@ class ControlPiston(QtCore.QObject):
                             cycle_too_long = True
                     if volume_too_high:
                         print("Volume is too high!")
-                            volume_too_high = False
+                        volume_too_high = False
                     if cycle_too_long:
                         print("Cycle is too long!")
                         cycle_too_long = False
@@ -217,17 +238,17 @@ class ControlPiston(QtCore.QObject):
 
             elif self.mode == 3:  # 'PSV'
                 # If it's time for a new cycle, volume and pressure are within limits
-                if (self.prs_data[1, -1] < self.gui["PSV_sensitivity_spb"].value()):
+                if P < self.gui["PSV_sensitivity_spb"].value():
                     compress = True
                     cycle_start = time.time()
                     while compress == True:  # Cycle starts, compress the Ambu
                         self.piston.pst_down()  # Starts the movement down
                         # Checks if the current pressure is above target
-                        if self.prs_data[1, -1] >= self.gui["PSV_pressure_spb"].value():
+                        if P >= self.gui["PSV_pressure_spb"].value():
                             compress = False
 
                         # Checks if the current volume is above maximum
-                        if self.vol_data[1, -1] >= self.gui["PCV_volume_max_spb"].value():
+                        if V >= self.gui["PCV_volume_max_spb"].value():
                             compress = False
                             volume_too_high = True
 
@@ -242,7 +263,7 @@ class ControlPiston(QtCore.QObject):
                             cycle_too_long = True
                     if volume_too_high:
                         print("Volume is too high!")
-                            volume_too_high = False
+                        volume_too_high = False
                     if cycle_too_long:
                         print("Cycle is too long!")
                         cycle_too_long = False
@@ -260,340 +281,340 @@ class ControlPiston(QtCore.QObject):
                 self.piston.stop()
 
             # Finds the indexes of data from the last cycle for flow and pressure
-            i_flw = np.where(time.time() - self.flw_data[0, :] < last_cycle_dur)[0]
-            i_prs = np.where(time.time() - self.prs_data[0, :] < last_cycle_dur)[0]
+            # i_flw = np.where(time.time() - self.flw_data[0, :] < last_cycle_dur)[0]
+            # i_prs = np.where(time.time() - self.prs_data[0, :] < last_cycle_dur)[0]
             
             # Sends the maximum pressure and volume in the last cycle to the interface
             # This try-except logic is just to avoid a problem when the max of an empty array is 
             # calculated, leading to an error.
-            try:
-                peak_prs = np.max(self.prs_data[1, i_prs])
-            except:
-                peak_prs = 0
-            try:
-                peak_flw = np.max(self.flw_data[1, i_flw])
-            except:
-                peak_flw = 0
-            try:
-                peak_vol = np.max(self.vol_data[1, i_flw])
-            except:
-                peak_vol = 0
+            # try:
+            #     peak_prs = np.max(self.prs_data[1, i_prs])
+            # except:
+            #     peak_prs = 0
+            # try:
+            #     peak_flw = np.max(self.flw_data[1, i_flw])
+            # except:
+            #     peak_flw = 0
+            # try:
+            #     peak_vol = np.max(self.vol_data[1, i_flw])
+            # except:
+            #     peak_vol = 0
             # Calculating the I:E ratio
-            ratio = exhale_time / inhale_time
+            # ratio = exhale_time / inhale_time
             self.cd["IE_ratio"] = self.cd["exhale_time"] / self.cd["inhale_time"]
             # Saving the data for the GUI update
-            self.cd["peak_pressure"] = peak_prs
-            self.cd["tidal_volume"] = peak_vol
+            # self.cd["peak_pressure"] = peak_prs
+            # self.cd["tidal_volume"] = peak_vol
             self.signal_cycle_data.emit(self.cd)
                     
 
 
 
-    def controller(self):
-        """
-        This function intends to replace all the separate functions that were developed to control
-        the pneumatic piston. By controlling the behavior of the piston at each step, a better
-        integration between the modes and the information that is shown on the screen may be
-        achieved.
-        When I started to write this function, there was no unified way to determine the stats on
-        the last cycle or to synchronize the data shown on the interface between modes.
-        A lot of the code was repeated between modes. By aggregating everything in one function I
-        hope to reduce the length of the code and keep this thread running with piston actions
-        based on the interface in a simpler way.
-        """
-        t_wait_up = 0
-        t_wait_down = 0
-        first_cycle = True
-        # Initializing the timers
-        up_cycle_end = time.time()
-        down_cycle_end = time.time()
-        last_cycle_dur = 0.1
-        inhale_time = 1
-        exhale_time = 1
-        PCV_ratio = 1
-        PSV_ratio = 1
-        # 5% margin of error for the target values
-        margin = 0.05
+    # def controller(self):
+    #     """
+    #     This function intends to replace all the separate functions that were developed to control
+    #     the pneumatic piston. By controlling the behavior of the piston at each step, a better
+    #     integration between the modes and the information that is shown on the screen may be
+    #     achieved.
+    #     When I started to write this function, there was no unified way to determine the stats on
+    #     the last cycle or to synchronize the data shown on the interface between modes.
+    #     A lot of the code was repeated between modes. By aggregating everything in one function I
+    #     hope to reduce the length of the code and keep this thread running with piston actions
+    #     based on the interface in a simpler way.
+    #     """
+    #     t_wait_up = 0
+    #     t_wait_down = 0
+    #     first_cycle = True
+    #     # Initializing the timers
+    #     up_cycle_end = time.time()
+    #     down_cycle_end = time.time()
+    #     last_cycle_dur = 0.1
+    #     inhale_time = 1
+    #     exhale_time = 1
+    #     PCV_ratio = 1
+    #     PSV_ratio = 1
+    #     # 5% margin of error for the target values
+    #     margin = 0.05
 
-        # creating lists to store information from the previous cycles, in order to calculate what
-        # needs to be changed for the next cycles. These lists will have a fixed maximum length.
-        list_max_len = 10
-        self.cd["pk_prs_lst"] = []
-        self.cd["pk_flw_lst"] = []
-        self.cd["pk_vol_lst"] = []
+    #     # creating lists to store information from the previous cycles, in order to calculate what
+    #     # needs to be changed for the next cycles. These lists will have a fixed maximum length.
+    #     list_max_len = 10
+    #     self.cd["pk_prs_lst"] = []
+    #     self.cd["pk_flw_lst"] = []
+    #     self.cd["pk_vol_lst"] = []
 
-        # Minimum time to move the piston down
-        minimum_tmd = 0.2  # s
+    #     # Minimum time to move the piston down
+    #     minimum_tmd = 0.2  # s
         
-        # Variable created for the PSV mode
-        triggered_last_cycle = False
+    #     # Variable created for the PSV mode
+    #     triggered_last_cycle = False
 
-        # Starts the automatic loop
-        while True:
-            # Finds the indexes of data from the last cycle for flow and pressure
-            i_flw = np.where(time.time() - self.flw_data[0, :] < last_cycle_dur)[0]
-            i_prs = np.where(time.time() - self.prs_data[0, :] < last_cycle_dur)[0]
+    #     # Starts the automatic loop
+    #     while True:
+    #         # Finds the indexes of data from the last cycle for flow and pressure
+    #         i_flw = np.where(time.time() - self.flw_data[0, :] < last_cycle_dur)[0]
+    #         i_prs = np.where(time.time() - self.prs_data[0, :] < last_cycle_dur)[0]
             
-            # Sends the maximum pressure and volume in the last cycle to the interface
-            # This try-except logic is just to avoid a problem when the max of an empty array is 
-            # calculated, leading to an error.
-            try:
-                peak_prs = np.max(self.prs_data[1, i_prs])
-            except:
-                peak_prs = 0
-            try:
-                peak_flw = np.max(self.flw_data[1, i_flw])
-            except:
-                peak_flw = 0
-            try:
-                peak_vol = np.max(self.vol_data[1, i_flw])
-            except:
-                peak_vol = 0
+    #         # Sends the maximum pressure and volume in the last cycle to the interface
+    #         # This try-except logic is just to avoid a problem when the max of an empty array is 
+    #         # calculated, leading to an error.
+    #         try:
+    #             peak_prs = np.max(self.prs_data[1, i_prs])
+    #         except:
+    #             peak_prs = 0
+    #         try:
+    #             peak_flw = np.max(self.flw_data[1, i_flw])
+    #         except:
+    #             peak_flw = 0
+    #         try:
+    #             peak_vol = np.max(self.vol_data[1, i_flw])
+    #         except:
+    #             peak_vol = 0
                 
-            # Appends new data to the lists
-            self.cd["pk_prs_lst"].append(peak_prs)
-            self.cd["pk_flw_lst"].append(peak_flw)
-            self.cd["pk_vol_lst"].append(peak_vol)
-            # If the list is too long, remove the first element (oldest)
-            if len(self.cd["pk_prs_lst"]) > list_max_len:
-                self.cd["pk_prs_lst"].pop(0)
-            if len(self.cd["pk_flw_lst"]) > list_max_len:
-                self.cd["pk_flw_lst"].pop(0)
-            if len(self.cd["pk_vol_lst"]) > list_max_len:
-                self.cd["pk_vol_lst"].pop(0)
+    #         # Appends new data to the lists
+    #         self.cd["pk_prs_lst"].append(peak_prs)
+    #         self.cd["pk_flw_lst"].append(peak_flw)
+    #         self.cd["pk_vol_lst"].append(peak_vol)
+    #         # If the list is too long, remove the first element (oldest)
+    #         if len(self.cd["pk_prs_lst"]) > list_max_len:
+    #             self.cd["pk_prs_lst"].pop(0)
+    #         if len(self.cd["pk_flw_lst"]) > list_max_len:
+    #             self.cd["pk_flw_lst"].pop(0)
+    #         if len(self.cd["pk_vol_lst"]) > list_max_len:
+    #             self.cd["pk_vol_lst"].pop(0)
 
-            self.cd["peak_pressure"] = peak_prs
-            self.cd["tidal_volume"] = peak_vol
+    #         self.cd["peak_pressure"] = peak_prs
+    #         self.cd["tidal_volume"] = peak_vol
 
-            if self.mode == 1:  # 'VCV'
-                """
-                This mode should press the ambu until the desired volume is reached. The maximum
-                flow limits how fast the volume is pumped. The frequency defines the period between
-                two breaths.
-                """
-                # Reading the relevant values from the interface
-                tgt_per = 60. / self.gui["VCV_frequency_spb"].value()
-                vol_max = self.gui["VCV_volume_max_spb"].value()
-                vol_min = self.gui["VCV_volume_min_spb"].value()
-                # The target volume is the mean between maximum and minimum
-                tgt_vol = (vol_max + vol_min) / 2.0 
-                # There should be a limit to the pressure
-                prs_max = self.gui["VCV_pressure_max_spb"].value()
-                # In case the person operating the respirator wants to measure the plateau pressure
-                self.pause_duration = self.gui["VCV_inhale_pause_spb"].value()
-                changes = False
+    #         if self.mode == 1:  # 'VCV'
+    #             """
+    #             This mode should press the ambu until the desired volume is reached. The maximum
+    #             flow limits how fast the volume is pumped. The frequency defines the period between
+    #             two breaths.
+    #             """
+    #             # Reading the relevant values from the interface
+    #             tgt_per = 60. / self.gui["VCV_frequency_spb"].value()
+    #             vol_max = self.gui["VCV_volume_max_spb"].value()
+    #             vol_min = self.gui["VCV_volume_min_spb"].value()
+    #             # The target volume is the mean between maximum and minimum
+    #             tgt_vol = (vol_max + vol_min) / 2.0 
+    #             # There should be a limit to the pressure
+    #             prs_max = self.gui["VCV_pressure_max_spb"].value()
+    #             # In case the person operating the respirator wants to measure the plateau pressure
+    #             self.pause_duration = self.gui["VCV_inhale_pause_spb"].value()
+    #             changes = False
 
-                # On the first cycle, use standard values
-                if first_cycle:
-                    inhale_time = tgt_per / 4.
-                    first_cycle = False
-                    # Defines how long each cycle takes, enabling the volume control
-                    t_move_up = tgt_per - inhale_time
-                    continue  # skips the rest of the for loop on the first cycle
+    #             # On the first cycle, use standard values
+    #             if first_cycle:
+    #                 inhale_time = tgt_per / 4.
+    #                 first_cycle = False
+    #                 # Defines how long each cycle takes, enabling the volume control
+    #                 t_move_up = tgt_per - inhale_time
+    #                 continue  # skips the rest of the for loop on the first cycle
 
-                if peak_vol > vol_max:
-                    changes = True
-                    inhale_time = inhale_time * tgt_vol / peak_vol
-                    if inhale_time < minimum_tmd:
-                        inhale_time = minimum_tmd
-                    # print(f"Volume is too high, reducing inhale_time to {inhale_time:.2f}")
-                if peak_vol < vol_min:
-                    changes = True
-                    if peak_vol == 0:  # Avoiding a division by zero
-                        new_inhale_time = inhale_time * (1.0 + margin)
-                    else:  # Proportional increase
-                        new_inhale_time = inhale_time * tgt_vol / peak_vol
-                    if new_inhale_time > tgt_per * 0.5:
-                        inhale_time = tgt_per * 0.5
-                    else:
-                        inhale_time = new_inhale_time
+    #             if peak_vol > vol_max:
+    #                 changes = True
+    #                 inhale_time = inhale_time * tgt_vol / peak_vol
+    #                 if inhale_time < minimum_tmd:
+    #                     inhale_time = minimum_tmd
+    #                 # print(f"Volume is too high, reducing inhale_time to {inhale_time:.2f}")
+    #             if peak_vol < vol_min:
+    #                 changes = True
+    #                 if peak_vol == 0:  # Avoiding a division by zero
+    #                     new_inhale_time = inhale_time * (1.0 + margin)
+    #                 else:  # Proportional increase
+    #                     new_inhale_time = inhale_time * tgt_vol / peak_vol
+    #                 if new_inhale_time > tgt_per * 0.5:
+    #                     inhale_time = tgt_per * 0.5
+    #                 else:
+    #                     inhale_time = new_inhale_time
 
-                # The pressure limit dictates how long the piston goes down or stays down
-                # PCV_ratio is how much of the move down time the piston just waits.
-                # if PCV_ratio is 1, the piston doesn't go down, only wait.
-                # if PCV_ratio is 0, all the time is spent going down, no wait.
-                # if PCV_ratio is 0.5, half of the time it goes down, then wait the other half.
-                # To reduce the peak pressure, increase the ratio
-                # If the peak_prs is higher than the limit
-                if peak_prs > prs_max:
-                    PCV_ratio = PCV_ratio * peak_prs / (prs_max)
+    #             # The pressure limit dictates how long the piston goes down or stays down
+    #             # PCV_ratio is how much of the move down time the piston just waits.
+    #             # if PCV_ratio is 1, the piston doesn't go down, only wait.
+    #             # if PCV_ratio is 0, all the time is spent going down, no wait.
+    #             # if PCV_ratio is 0.5, half of the time it goes down, then wait the other half.
+    #             # To reduce the peak pressure, increase the ratio
+    #             # If the peak_prs is higher than the limit
+    #             if peak_prs > prs_max:
+    #                 PCV_ratio = PCV_ratio * peak_prs / (prs_max)
                 
-                # If a change in inhaletime was not performed this cycle and 
-                # if it is operating at less than 80% of the max pressure, increase the pcv ratio
-                elif peak_prs < 0.8 * prs_max and not changes:
-                    PCV_ratio = PCV_ratio * 0.95
-                # Making sure that PCV_ratio is within the limits [0, 1]
-                if PCV_ratio > 1:
-                    PCV_ratio = 1
-                if PCV_ratio < 0:
-                    PCV_ratio = 1E-3
+    #             # If a change in inhaletime was not performed this cycle and 
+    #             # if it is operating at less than 80% of the max pressure, increase the pcv ratio
+    #             elif peak_prs < 0.8 * prs_max and not changes:
+    #                 PCV_ratio = PCV_ratio * 0.95
+    #             # Making sure that PCV_ratio is within the limits [0, 1]
+    #             if PCV_ratio > 1:
+    #                 PCV_ratio = 1
+    #             if PCV_ratio < 0:
+    #                 PCV_ratio = 1E-3
 
-                # Defines how long each cycle takes. This is the main method of controlling the
-                # cycle in this mode.
-                t_move_down = inhale_time / (1 + PCV_ratio)
-                t_wait_down = inhale_time / (1 + 1 / PCV_ratio)
-                t_move_up = tgt_per - t_move_down - t_wait_down
+    #             # Defines how long each cycle takes. This is the main method of controlling the
+    #             # cycle in this mode.
+    #             t_move_down = inhale_time / (1 + PCV_ratio)
+    #             t_wait_down = inhale_time / (1 + 1 / PCV_ratio)
+    #             t_move_up = tgt_per - t_move_down - t_wait_down
 
-                # Defines how long each cycle takes, enabling the volume control
-                # t_move_up = tgt_per - t_move_down
-                # t_wait_up = 0
-                # t_wait_down = 0
-               # self.pst_dir = 0
+    #             # Defines how long each cycle takes, enabling the volume control
+    #             # t_move_up = tgt_per - t_move_down
+    #             # t_wait_up = 0
+    #             # t_wait_down = 0
+    #            # self.pst_dir = 0
 
-            elif self.mode == 2:  # 'PCV'
-                """
-                This mode should press the ambu until the desired pressure is reached. The maximum 
-                flow limits how fast the volume is pumped. The frequency defines the period between 
-                two breaths.
-                """
-                # The target period (in secs) has to be calculated as a function of the frequency 
-                # (in rpm)
-                tgt_per = 60. / self.gui["PCV_frequency_spb"].value()
-                # Reading the relevant values from the interface
-                tgt_prs = self.gui["PCV_pressure_spb"].value()
-                #t_move_down = self.gui["PCV_rise_time_spb"].value()
-                inhale_time = self.gui["PCV_inhale_time_spb"].value()
-                vol_max = self.gui["PCV_volume_max_spb"].value()
-                self.pause_duration = self.gui["PCV_inhale_pause_spb"].value()
+    #         elif self.mode == 2:  # 'PCV'
+    #             """
+    #             This mode should press the ambu until the desired pressure is reached. The maximum 
+    #             flow limits how fast the volume is pumped. The frequency defines the period between 
+    #             two breaths.
+    #             """
+    #             # The target period (in secs) has to be calculated as a function of the frequency 
+    #             # (in rpm)
+    #             tgt_per = 60. / self.gui["PCV_frequency_spb"].value()
+    #             # Reading the relevant values from the interface
+    #             tgt_prs = self.gui["PCV_pressure_spb"].value()
+    #             #t_move_down = self.gui["PCV_rise_time_spb"].value()
+    #             inhale_time = self.gui["PCV_inhale_time_spb"].value()
+    #             vol_max = self.gui["PCV_volume_max_spb"].value()
+    #             self.pause_duration = self.gui["PCV_inhale_pause_spb"].value()
             
-                # Calculate the peak pressure during the last cycle and adjust how long the piston
-                # goes down or stays down
-                try:
-                    peak_prs = np.max(self.prs_data[1, idxs_last_cycle])
-                    # If the peak_prs is higher than the target and margin
-                    if peak_prs > tgt_prs * (1 + margin):
-                        PCV_ratio = PCV_ratio * peak_prs / (tgt_prs * (1 + 3 * margin))
-                    if peak_prs < tgt_prs * (1 - margin):
-                        PCV_ratio = PCV_ratio * peak_prs / (tgt_prs * (1 - 3 * margin))
-                    # Making sure that PCV_ratio is within the limits [0, 1]
-                    if PCV_ratio > 1:
-                        PCV_ratio = 1
-                    if PCV_ratio < 0:
-                        PCV_ratio = 1E-3
-                except:
-                    # couldn't define an better PCV_ratio, therefore don't change that.
-                    peak_prs = 0
-                # Defines how long each cycle takes. This is the main method of controlling the
-                # cycle in this mode.
-                t_move_down = inhale_time / (1 + PCV_ratio)
-                t_wait_down = inhale_time / (1 + 1 / PCV_ratio)
-                t_move_up = tgt_per - t_move_down - t_wait_down
+    #             # Calculate the peak pressure during the last cycle and adjust how long the piston
+    #             # goes down or stays down
+    #             try:
+    #                 peak_prs = np.max(self.prs_data[1, idxs_last_cycle])
+    #                 # If the peak_prs is higher than the target and margin
+    #                 if peak_prs > tgt_prs * (1 + margin):
+    #                     PCV_ratio = PCV_ratio * peak_prs / (tgt_prs * (1 + 3 * margin))
+    #                 if peak_prs < tgt_prs * (1 - margin):
+    #                     PCV_ratio = PCV_ratio * peak_prs / (tgt_prs * (1 - 3 * margin))
+    #                 # Making sure that PCV_ratio is within the limits [0, 1]
+    #                 if PCV_ratio > 1:
+    #                     PCV_ratio = 1
+    #                 if PCV_ratio < 0:
+    #                     PCV_ratio = 1E-3
+    #             except:
+    #                 # couldn't define an better PCV_ratio, therefore don't change that.
+    #                 peak_prs = 0
+    #             # Defines how long each cycle takes. This is the main method of controlling the
+    #             # cycle in this mode.
+    #             t_move_down = inhale_time / (1 + PCV_ratio)
+    #             t_wait_down = inhale_time / (1 + 1 / PCV_ratio)
+    #             t_move_up = tgt_per - t_move_down - t_wait_down
 
-            elif self.mode == 3:  # 'PSV'
-                """
-                This mode must detect a negative pressure (patient is trying to inhale) and start a 
-                cycle with the pressure limited 
-                """
-                tgt_prs = self.gui["PSV_pressure_spb"].value()
-                threshold = self.gui["PSV_sensitivity_spb"].value()
-                self.pause_duration = self.gui["PSV_inhale_pause_spb"].value()
+    #         elif self.mode == 3:  # 'PSV'
+    #             """
+    #             This mode must detect a negative pressure (patient is trying to inhale) and start a 
+    #             cycle with the pressure limited 
+    #             """
+    #             tgt_prs = self.gui["PSV_pressure_spb"].value()
+    #             threshold = self.gui["PSV_sensitivity_spb"].value()
+    #             self.pause_duration = self.gui["PSV_inhale_pause_spb"].value()
                 
-                # Calculate the peak pressure during the last cycle and adjust how long the piston
-                # goes down or stays down
-                try:
-                    peak_prs = np.max(self.prs_data[1, idxs_last_cycle])
-                except:
-                    peak_prs = 0
-                if peak_prs > tgt_prs * (1 + margin):
-                    print(f"Peak pressure {peak_prs:.1f} cmH2O is too high")
-                    PCV_ratio = PSV_ratio * (1 + margin)
-                elif peak_prs < tgt_prs * (1 - margin):
-                    print(f"Peak pressure {peak_prs:.1f} cmH2O is too low, open valve")
-                    PCV_ratio = PSV_ratio * (1 - margin)
-                else:
-                    print(f"Peak pressure is close to {tgt_prs:.1f}: {peak_prs:.1f} cmH2O")
+    #             # Calculate the peak pressure during the last cycle and adjust how long the piston
+    #             # goes down or stays down
+    #             try:
+    #                 peak_prs = np.max(self.prs_data[1, idxs_last_cycle])
+    #             except:
+    #                 peak_prs = 0
+    #             if peak_prs > tgt_prs * (1 + margin):
+    #                 print(f"Peak pressure {peak_prs:.1f} cmH2O is too high")
+    #                 PCV_ratio = PSV_ratio * (1 + margin)
+    #             elif peak_prs < tgt_prs * (1 - margin):
+    #                 print(f"Peak pressure {peak_prs:.1f} cmH2O is too low, open valve")
+    #                 PCV_ratio = PSV_ratio * (1 - margin)
+    #             else:
+    #                 print(f"Peak pressure is close to {tgt_prs:.1f}: {peak_prs:.1f} cmH2O")
 
-                # Defines how long each cycle takes. This is the main method of controlling the
-                # cycle in this mode.
-                t_move_down = 1 / (1 + PCV_ratio)
-                t_wait_down = 1 / (1 + 1 / PCV_ratio)
-                t_move_up = t_move_down + t_wait_down
+    #             # Defines how long each cycle takes. This is the main method of controlling the
+    #             # cycle in this mode.
+    #             t_move_down = 1 / (1 + PCV_ratio)
+    #             t_wait_down = 1 / (1 + 1 / PCV_ratio)
+    #             t_move_up = t_move_down + t_wait_down
 
-                sens_range = 0.2
-                ids_prs = np.where(time.time() - self.prs_data[0, :] < sens_range)[0]
-                try:
-                    prs_trigger = np.mean(self.prs_data[1, ids_prs])
-                except:
-                    prs_trigger = np.inf
-                # Negative pressure means patient is trying to breathe
-                # threshold = -0.5  # cmH2O
-                if triggered_last_cycle:
-                    triggered_last_cycle = False
-                    self.pst_dir = 1
-                elif prs_trigger < threshold:
-                    triggered_last_cycle = True
-                    self.pst_dir = 0
-                else:
-                    time.sleep(sens_range / 2)
-                    self.pst_dir = 2
+    #             sens_range = 0.2
+    #             ids_prs = np.where(time.time() - self.prs_data[0, :] < sens_range)[0]
+    #             try:
+    #                 prs_trigger = np.mean(self.prs_data[1, ids_prs])
+    #             except:
+    #                 prs_trigger = np.inf
+    #             # Negative pressure means patient is trying to breathe
+    #             # threshold = -0.5  # cmH2O
+    #             if triggered_last_cycle:
+    #                 triggered_last_cycle = False
+    #                 self.pst_dir = 1
+    #             elif prs_trigger < threshold:
+    #                 triggered_last_cycle = True
+    #                 self.pst_dir = 0
+    #             else:
+    #                 time.sleep(sens_range / 2)
+    #                 self.pst_dir = 2
 
-            else:  # STOP
-                pass
-                # Does not move, just waits and continues to the next cycle
-                # time.sleep(0.05)
-                # continue
+    #         else:  # STOP
+    #             pass
+    #             # Does not move, just waits and continues to the next cycle
+    #             # time.sleep(0.05)
+    #             # continue
 
-            # After the configuration of the cycle times, perform the movement
-            if self.mode in [1, 2, 3]:
-                move_start = time.time()
-                self.cd["inhale_instant"] = move_start
-                if self.pst_dir == 0:  # Should move down
-                    # the movement will last a maximum of "t_move_down"
-                    self.pst_pos = self.piston.piston_down(t_move_down)
-                    # Waits until t_move_down is completed, in case the piston descended faster
-                    move_down_dur = time.time() - move_start
-                    if move_down_dur < t_move_down:
-                        time.sleep(t_move_down - move_down_dur)
-                    # If the pause button was pressed, pauses 
-                    if self.pause == True:
-                        time.sleep(self.pause_duration)
-                        t_wait_down = t_wait_down - self.pause_duration
-                        self.pause = False
-                    # if the piston needs to wait in the down position
-                    if t_wait_down > 0:
-                        time.sleep(t_wait_down)
-                    self.pst_dir = 1
-                    down_cycle_end = time.time()
+    #         # After the configuration of the cycle times, perform the movement
+    #         if self.mode in [1, 2, 3]:
+    #             move_start = time.time()
+    #             self.cd["inhale_instant"] = move_start
+    #             if self.pst_dir == 0:  # Should move down
+    #                 # the movement will last a maximum of "t_move_down"
+    #                 self.pst_pos = self.piston.piston_down(t_move_down)
+    #                 # Waits until t_move_down is completed, in case the piston descended faster
+    #                 move_down_dur = time.time() - move_start
+    #                 if move_down_dur < t_move_down:
+    #                     time.sleep(t_move_down - move_down_dur)
+    #                 # If the pause button was pressed, pauses 
+    #                 if self.pause == True:
+    #                     time.sleep(self.pause_duration)
+    #                     t_wait_down = t_wait_down - self.pause_duration
+    #                     self.pause = False
+    #                 # if the piston needs to wait in the down position
+    #                 if t_wait_down > 0:
+    #                     time.sleep(t_wait_down)
+    #                 self.pst_dir = 1
+    #                 down_cycle_end = time.time()
                 
-                elif self.pst_dir == 1:  # Should move up
-                    self.pst_pos = self.piston.piston_up(t_move_up)
-                    move_up_dur = time.time() - move_start
-                    # If this movement was faster than the expected duration, wait
-                    if move_up_dur < t_move_up:
-                        time.sleep(t_move_up - move_up_dur)
-                    # if the piston needs to wait in the up position
-                    if t_wait_up > 0:
-                        time.sleep(t_wait_up)
-                    self.pst_dir = 0
-                    up_cycle_end = time.time()
+    #             elif self.pst_dir == 1:  # Should move up
+    #                 self.pst_pos = self.piston.piston_up(t_move_up)
+    #                 move_up_dur = time.time() - move_start
+    #                 # If this movement was faster than the expected duration, wait
+    #                 if move_up_dur < t_move_up:
+    #                     time.sleep(t_move_up - move_up_dur)
+    #                 # if the piston needs to wait in the up position
+    #                 if t_wait_up > 0:
+    #                     time.sleep(t_wait_up)
+    #                 self.pst_dir = 0
+    #                 up_cycle_end = time.time()
 
-                else:  # Should do nothing
-                    #print("do nothing")
-                    continue
+    #             else:  # Should do nothing
+    #                 #print("do nothing")
+    #                 continue
 
-            # Emergency mode
-            elif self.mode == 4:
-                self.piston.emergency()
+    #         # Emergency mode
+    #         elif self.mode == 4:
+    #             self.piston.emergency()
 
-            # Stop
-            else:
-                self.piston.stop()
+    #         # Stop
+    #         else:
+    #             self.piston.stop()
 
-            # Calculating how long the inhale and exhale took
-            if self.pst_dir == 0:  # The up cycle has just ended
-                exhale_time = up_cycle_end - down_cycle_end
-            elif self.pst_dir == 1:  # The down cycle has just ended
-                inhale_time = down_cycle_end - up_cycle_end
+    #         # Calculating how long the inhale and exhale took
+    #         if self.pst_dir == 0:  # The up cycle has just ended
+    #             exhale_time = up_cycle_end - down_cycle_end
+    #         elif self.pst_dir == 1:  # The down cycle has just ended
+    #             inhale_time = down_cycle_end - up_cycle_end
 
-            last_cycle_dur = exhale_time + inhale_time
+    #         last_cycle_dur = exhale_time + inhale_time
 
-            # Calculating the I:E ratio
-            ratio = exhale_time / inhale_time
-            self.cd["IE_ratio"] = ratio
-            # Saving the data for the GUI update
-            self.cd["inhale_time"] = inhale_time
-            self.cd["exhale_time"] = exhale_time
-            self.signal_cycle_data.emit(self.cd)
+    #         # Calculating the I:E ratio
+    #         ratio = exhale_time / inhale_time
+    #         self.cd["IE_ratio"] = ratio
+    #         # Saving the data for the GUI update
+    #         self.cd["inhale_time"] = inhale_time
+    #         self.cd["exhale_time"] = exhale_time
+    #         self.signal_cycle_data.emit(self.cd)
 
 class InterfaceControl(QtCore.QObject):
     """
@@ -774,26 +795,26 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
         # Configuration of the default values on the interface
         self.start_interface()
 
+        # Creates queues and lists to process the data read from the sensors
+        self.create_data_structures()
+
         # Starting the graphs and threads
         self.create_graphs()
         self.create_threads()
 
-        # Creates a timer to update the graphs at some period
-        self.timer = QtCore.QTimer()
+        # Creates a timer to update the graphs at a specific frequency
+        self.gui_timer = QtCore.QTimer()
         gui_update_frequency = 50  # FPS
         gui_update_period = 1000 / gui_update_frequency  # period in ms
-        self.timer.start(gui_update_period)
-        self.timer.timeout.connect(self.update_graphs)
+        self.gui_timer.start(gui_update_period)
+        self.gui_timer.timeout.connect(self.update_graphs)
 
-        # Start main loop, which could be used instead of calling the update graphs with
-        # timers, but creates other problems such as a blocked interface
-        # self.main_loop()
-
-    # def main_loop(self):
-    #     while(True):
-    #         app.processEvents()
-    #         self.update_graphs()
-    #         time.sleep(0.01)
+        # Creates a timer to update the data at a specific frequency
+        self.data_timer = QtCore.QTimer()
+        data_update_frequency = 100  # Hz
+        data_update_period = 1000 / data_update_frequency  # period in ms
+        self.data_timer.start(data_update_period)
+        self.data_timer.timeout.connect(self.process_data)
 
     def connect_buttons(self):
         # Buttons
@@ -935,6 +956,111 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
         self.cfg_tare_plus_btn.clicked.connect(lambda: self.change_value(self.cfg_tare_spb, "+"))
         self.cfg_tare_minus_btn.clicked.connect(lambda: self.change_value(self.cfg_tare_spb, "-"))
 
+    def create_data_structures(self):
+        """
+        Creates the arrays and queues that will be used to control the piston and update the graphs
+        """
+        # Data storage arrays for time and measurement
+        # Create the array of zeros and preallocating
+        start_time = time.time()
+        # The number of data points has to be optimized
+        self.data_points = 5000
+        # prs_data has three rows, 0 = time, 1 = pressure - tare, 2 = raw_pressure
+        self.prs_data = np.zeros([3, self.data_points])
+        self.prs_data[0, :] = start_time
+        # This queue receives data from the sensors and puts it in the graphs and sends to the 
+        # LifoQueue
+        self.prs_q = Queue()
+        # The lifo queue is created to send the data to the piston control thread. The piston
+        # control will only read and use the last value, since only the most recent information
+        # matters
+        self.prs_lifo_q = LifoQueue()
+        self.prs_tare = 0
+        
+        self.flw_data = np.zeros([3, self.data_points])
+        self.flw_data[0, :] = start_time
+        self.flw_q = Queue()
+        self.flw_lifo_q = LifoQueue()  # Read comment on the lifoqueue above
+        self.flw_tare = 0
+
+        self.vol_lifo_q = LifoQueue()  # Read comment on the lifoqueue above
+        self.vol_data = np.zeros([2, self.data_points])
+        self.vol_data[0, :] = start_time
+        
+    def process_data(self):
+        """
+        This function receives data from the sensors via a queue, puts it into arrays for the graphs 
+        and also puts it into a LifoQueue for the piston control function.
+        """
+        # If both queues are empty, just wait
+        if self.prs_q.empty() and self.flw_q.empty():
+            time.sleep(0.01)
+            return
+
+        # while the pressure queue is not empty, get the data and append
+        new_prs_data = False
+        while not self.prs_q.empty():
+            t, pressure = self.prs_q.get()
+            # Puts the same data on the queue that is read by the piston control thread
+            self.prs_lifo_q.put([t, pressure])
+            # Rolls the array
+            self.prs_data = np.roll(self.prs_data, 1)
+            # inserts the new data in the current i position
+            self.prs_data[:, 0] = (t, pressure - self.prs_tare, pressure)
+            new_prs_data = True
+        if new_prs_data:
+            # Signals that it got all the data from the queue and the sensors can continue to put
+            # new data in the queue
+            self.prs_q.task_done()
+
+        # while the flow queue is not empty, get the data and append
+        new_flw_data = False
+        while not self.flw_q.empty():
+            t, flow = self.flw_q.get()
+            self.flw_lifo_q.put([t, flow])
+            # Rolls the array
+            self.flw_data = np.roll(self.flw_data, 1)
+            # inserts the new data in the current i position
+            self.flw_data[:, 0] = (t, flow - self.flw_tare, flow)
+            new_flw_data = True
+        if new_flw_data:
+            # Signals that it got all the data from the queue and the sensors can continue to put
+            # new data in the queue
+            self.flw_q.task_done()
+
+        # Calculating volume from the flow
+        now = time.time()
+        try:
+            last_inhale = now - self.cd["inhale_instant"]
+        except:
+            last_inhale = 3
+        # Gets the indexes of the data since the last breath
+        i_li = np.where(now - self.flw_data[0, :] < last_inhale)[0]
+        # volume = np.sum(self.flw_data[1, i_li]) / (60 * last_inhale)
+        # Integrating the flow with trapz to get accurate results, considering the dt is not 
+        # constant between samples. The time is negative, so needs to invert the signal
+        volume = -integrate.trapz(self.flw_data[1, i_li], self.flw_data[0, i_li])
+        # Converting the volume from L to mL and time from minute to second
+        volume = 1000 * volume / 60
+        self.vol_lifo_q.put([t, volume])
+        self.vol_data = np.roll(self.vol_data, 1)
+        self.vol_data[:, 0] = (t, volume)
+
+
+        # Gets the tare of the pressure and flow sensors and updates the data 
+        if self.get_tare and self.worker_piston.mode == 0:
+            idxs_flw_tare = np.where(time.time() - self.flw_data[0, :] < self.tare_duration)[0]
+            self.flw_tare = np.mean(self.flw_data[2, idxs_flw_tare])
+            self.flw_data[1, :] = self.flw_data[2, :] - self.flw_tare
+            idxs_prs_tare = np.where(time.time() - self.prs_data[0, :] < self.tare_duration)[0]
+            self.prs_tare = np.mean(self.prs_data[2, idxs_prs_tare])
+            self.prs_data[1, :] = self.prs_data[2, :] - self.prs_tare
+            self.get_tare = False
+        if self.get_tare and self.worker_piston.mode != 0:
+            print("The respirator must be stopped before adjusting the tare.")
+            self.get_tare = False
+
+
     def create_graphs(self):
         # Definitions to create the graphs
         # creates the pressure plot widget 
@@ -951,26 +1077,6 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
         self.volume_graph_VBox.addWidget(self.vol_pw)
         self.vol_lbl = pg.TextItem()
         self.vol_pw.addItem(self.vol_lbl, ignoreBounds=True) 
-        
-        # Data storage arrays for time and measurement
-        # Create the array of zeros and preallocating
-        start_time = time.time()
-        # The number of data points has to be optimized, but running at 10 fps, 200 data_points
-        # correspond to about 18 seconds of data.
-        self.data_points = 5000
-        # prs_data has three rows, 0 = time, 1 = pressure - tare, 2 = raw_pressure
-        self.prs_data = np.zeros([3, self.data_points])
-        self.prs_data[0, :] = start_time
-        self.prs_q = Queue()
-        self.prs_tare = 0
-        
-        self.flw_data = np.zeros([3, self.data_points])
-        self.flw_data[0, :] = start_time
-        self.flw_q = Queue()
-        self.flw_tare = 0
-        
-        self.vol_data = np.zeros([2, self.data_points])
-        self.vol_data[0, :] = start_time
         
         # Plot settings
         bg_color = "#000032"  # Background color
@@ -1068,14 +1174,16 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
         
         # Piston control thread
         # self.worker_piston = ControlPiston(self.piston, gui_items, mode=0)
-        self.worker_piston = ControlPiston(gui_items, mode=0)
+        self.worker_piston = ControlPiston(gui_items, self.flw_lifo_q, self.prs_lifo_q,
+                                           self.vol_lifo_q, mode=0)
         self.thread_piston = QtCore.QThread()
         self.worker_piston.moveToThread(self.thread_piston)
         # Another way of passing variables to threads
         # This is done again at every loop where flow, pressure and volume are updated
-        self.worker_piston.flw_data = self.flw_data
-        self.worker_piston.vol_data = self.vol_data
-        self.worker_piston.prs_data = self.prs_data
+        # This is not thread safe, the correct way to pass data to threads is using queues
+        # self.worker_piston.flw_data = self.flw_data
+        # self.worker_piston.vol_data = self.vol_data
+        # self.worker_piston.prs_data = self.prs_data
         self.worker_piston.signal_cycle_data.connect(self.update_interface)
         self.worker_piston.signal_startup_error.connect(self.error_window.show)
         self.error_window.signal_retry_startup.connect(self.worker_piston.startup)
@@ -1117,108 +1225,47 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
     # try to use this funtion without having to create a new instance every cycle
     def update_graphs(self):
         """
-        This function continuously checks if the queues have available data and update the graphs
+        This function updates the graphs with data from the arrays
         """
         profile_time = False
         if profile_time:
             start_time = time.time()
 
-        # If both queues are empty, just wait
-        if self.prs_q.empty() and self.flw_q.empty():
-            time.sleep(0.1)
-            return
+        # Update the graph data with data only within the chosen time_range
+        now = time.time()
+        i_tr_prs = np.where(now - self.prs_data[0, :] < 
+                            self.time_range[1] - self.time_range[0])[0]
+        self.prs_graph.setData(self.prs_data[0, i_tr_prs] - now, self.prs_data[1, i_tr_prs])
+        # Updates the graph title
+        self.prs_pw.setTitle(f"Pressão: {self.prs_data[1, 0]:.1f} cmH2O", **self.ttl_style)
 
-        # while the pressure queue is not empty, get the data and append
-        new_prs_data = False
-        while not self.prs_q.empty():
-            t, pressure = self.prs_q.get()
-            # Rolls the array
-            self.prs_data = np.roll(self.prs_data, 1)
-            # inserts the new data in the current i position
-            self.prs_data[:, 0] = (t, pressure - self.prs_tare, pressure)
-            new_prs_data = True
-        if new_prs_data:
-            # Signals that it got all the data from the queue and the sensors can continue to put
-            # new data in the queue
-            self.prs_q.task_done()
-
-            # Update the graph data with data only within the chosen time_range
-            now = time.time()
-            i_tr_prs = np.where(now - self.prs_data[0, :] <
-                                self.time_range[1] - self.time_range[0])[0]
-            self.prs_graph.setData(self.prs_data[0, i_tr_prs] - now, self.prs_data[1, i_tr_prs])
-            # Updates the graph title
-            self.prs_pw.setTitle(f"Pressão: {self.prs_data[1, 0]:.1f} cmH2O", **self.ttl_style)
-
-            # Updates the data that is given to the piston function
-            self.worker_piston.prs_data = self.prs_data
-
-            if profile_time == True:
-                time_at_pressure = time.time()
-                print(f"Until pressure graph: {time_at_pressure - start_time:.4f} s")
+        if profile_time == True:
+            time_at_pressure = time.time()
+            print(f"Until pressure graph: {time_at_pressure - start_time:.4f} s")
         
-        # while the flow queue is not empty, get the data and append
-        new_flw_data = False
-        while not self.flw_q.empty():
-            t, flow = self.flw_q.get()
-            # Rolls the array
-            self.flw_data = np.roll(self.flw_data, 1)
-            # inserts the new data in the current i position
-            self.flw_data[:, 0] = (t, flow - self.flw_tare, flow)
-            new_flw_data = True
-        if new_flw_data:
-            # Signals that it got all the data from the queue and the sensors can continue to put
-            # new data in the queue
-            self.flw_q.task_done()
+        # Update the graph data with data only within the chosen time_range
+        now = time.time()
+        i_tr_flw = np.where(now - self.flw_data[0, :] < 
+                            self.time_range[1] - self.time_range[0])[0]
+        self.flw_pw.setTitle(f"Fluxo: {self.flw_data[1, 0]:.1f} l/min", **self.ttl_style)
+        self.flw_graph.setData(self.flw_data[0, i_tr_flw] - now, self.flw_data[1, i_tr_flw])
 
-            # Update the graph data with data only within the chosen time_range
-            now = time.time()
-            i_tr_flw = np.where(now - self.flw_data[0, :] < 
-                                self.time_range[1] - self.time_range[0])[0]
-            self.flw_pw.setTitle(f"Fluxo: {self.flw_data[1, 0]:.1f} l/min", **self.ttl_style)
-            self.flw_graph.setData(self.flw_data[0, i_tr_flw] - now, self.flw_data[1, i_tr_flw])
+        if profile_time == True:
+            time_at_flow = time.time()
+            print(f"Until flow graph: {time_at_flow - start_time:.4f} s")
 
-            # Updates the data that is given to the piston function
-            self.worker_piston.flw_data = self.flw_data
+        i_tr_vol = np.where(now - self.vol_data[0, :] < 
+                    self.time_range[1] - self.time_range[0])[0]
+        self.vol_pw.setTitle(f"Volume: {self.vol_data[1, 0]:.0f} ml", **self.ttl_style)
+        self.vol_graph.setData(self.vol_data[0, i_tr_vol] - now, self.vol_data[1, i_tr_vol])
 
-            if profile_time == True:
-                time_at_flow = time.time()
-                print(f"Until flow graph: {time_at_flow - start_time:.4f} s")
-        
-            # Calculating volume from the flow
-            now = time.time()
-            try:
-                last_inhale = now - self.cd["inhale_instant"]
-            except:
-                last_inhale = 3
-            # Gets the indexes of the data since the last breath
-            i_li = np.where(now - self.flw_data[0, :] < last_inhale)[0]
-            # volume = np.sum(self.flw_data[1, i_li]) / (60 * last_inhale)
-            # Integrating the flow with trapz to get accurate results, considering the dt is not 
-            # constant between samples. The time is negative, so needs to invert the signal
-            volume = -integrate.trapz(self.flw_data[1, i_li], self.flw_data[0, i_li])
-            # Converting the volume from L to mL and time from minute to second
-            volume = 1000 * volume / 60
-            self.vol_data = np.roll(self.vol_data, 1)
-            self.vol_data[:, 0] = (self.flw_data[0, 0], volume)
-            i_tr_vol = np.where(now - self.vol_data[0, :] < 
-                                self.time_range[1] - self.time_range[0])[0]
-
-            self.vol_pw.setTitle(f"Volume: {self.vol_data[1, 0]:.0f} ml", **self.ttl_style)
-            self.vol_graph.setData(self.vol_data[0, i_tr_vol] - now, self.vol_data[1, i_tr_vol])
-
-            # Updates the data that is given to the piston function
-            self.worker_piston.vol_data = self.vol_data
-
-
-            if profile_time == True:
-                time_at_volume = time.time()
-                print(f"After the volume graph: {time_at_volume - time_at_flow:.4f} s")
+        if profile_time == True:
+            time_at_volume = time.time()
+            print(f"After the volume graph: {time_at_volume - time_at_flow:.4f} s")
 
         # Adjust the Y range every N measurements
-        # Manually adjusting by calculating the max and min with numpy is faster than 
-        # autoscale on the graph
-        # Also calculates FPS
+        # Manually adjusting by calculating the max and min with numpy is faster than autoscale on 
+        # the graph. Also calculates FPS
         N = 20
         if self.run_counter % N == 0:
             # definition of the minimum acceptable range for the volume
@@ -1247,24 +1294,14 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
             except:
                 pass
             mean_pts = 50
-            FPS = np.nan_to_num(1.0 / np.mean(self.vol_data[0, 0:mean_pts] - 
-                                self.vol_data[0, 1:1+mean_pts]))
+            try:
+                FPS = np.nan_to_num(1.0 / np.mean(self.vol_data[0, 0:mean_pts] - 
+                                    self.vol_data[0, 1:1+mean_pts]))
+            except:
+                FPS = 0
             self.fps_lbl.setText(f"FPS: {FPS:.2f}")
             self.run_counter = 0
         self.run_counter += 1
-
-        # Gets the tare of the pressure and flow sensors and updates the data 
-        if self.get_tare and self.worker_piston.mode == 0:
-            idxs_flw_tare = np.where(time.time() - self.flw_data[0, :] < self.tare_duration)[0]
-            self.flw_tare = np.mean(self.flw_data[2, idxs_flw_tare])
-            self.flw_data[1, :] = self.flw_data[2, :] - self.flw_tare
-            idxs_prs_tare = np.where(time.time() - self.prs_data[0, :] < self.tare_duration)[0]
-            self.prs_tare = np.mean(self.prs_data[2, idxs_prs_tare])
-            self.prs_data[1, :] = self.prs_data[2, :] - self.prs_tare
-            self.get_tare = False
-        if self.get_tare and self.worker_piston.mode != 0:
-            print("The respirator must be stopped before adjusting the tare.")
-            self.get_tare = False
 
     def exit(self):
         sys.exit()

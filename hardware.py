@@ -259,66 +259,66 @@ class pneumatic_piston():
         GPIO.add_event_detect(self.pin_sensor_up, GPIO.RISING, 
                               callback=lambda x:self.position_sensor("up"))
         
-    def piston_down(self, duration):
-        """
-        Lowers the piston if it is not already on the bottom. Once the piston reached the bottom, as 
-        identified by the endstop sensor, returns True indicating that the movement happened as 
-        desired. If there was a timeout, stops the movement and returns False. The timeout might be
-        because something stopped the piston from moving or it may be the desired duration of the 
-        movement, which stops before reaching the endstop.
-        """
-        if GPIO.input(self.pin_sensor_down) == True:
-            # The piston is already at the lowest position.
-            return 'bottom'
-        GPIO.output(self.pin_up, 0)  # Guarantees the piston is not going up
-        GPIO.output(self.pin_down, 1)
-        # The timeout must be an int in ms
-        ms_duration = int(round(1000 * duration, 0))
-        if ms_duration < 1:  # This value must be always greater than zero
-            print(f"Timeout Error, less than 1 ms: {ms_duration}")
-            ms_duration = 1
-        down = GPIO.wait_for_edge(self.pin_sensor_down, GPIO.RISING, timeout=ms_duration)
-        # In any case, turn the output off
-        GPIO.output(self.pin_down, 0)
-        # return depending on the case
-        if down is None:  # Timeout occurred
-            return None
-        # Didn't timeout, piston went down normally
-        return 'bottom'
+    # def piston_down(self, duration):
+    #     """
+    #     Lowers the piston if it is not already on the bottom. Once the piston reached the bottom, as 
+    #     identified by the endstop sensor, returns True indicating that the movement happened as 
+    #     desired. If there was a timeout, stops the movement and returns False. The timeout might be
+    #     because something stopped the piston from moving or it may be the desired duration of the 
+    #     movement, which stops before reaching the endstop.
+    #     """
+    #     if GPIO.input(self.pin_sensor_down) == True:
+    #         # The piston is already at the lowest position.
+    #         return 'bottom'
+    #     GPIO.output(self.pin_up, 0)  # Guarantees the piston is not going up
+    #     GPIO.output(self.pin_down, 1)
+    #     # The timeout must be an int in ms
+    #     ms_duration = int(round(1000 * duration, 0))
+    #     if ms_duration < 1:  # This value must be always greater than zero
+    #         print(f"Timeout Error, less than 1 ms: {ms_duration}")
+    #         ms_duration = 1
+    #     down = GPIO.wait_for_edge(self.pin_sensor_down, GPIO.RISING, timeout=ms_duration)
+    #     # In any case, turn the output off
+    #     GPIO.output(self.pin_down, 0)
+    #     # return depending on the case
+    #     if down is None:  # Timeout occurred
+    #         return None
+    #     # Didn't timeout, piston went down normally
+    #     return 'bottom'
         
-    def piston_up(self, duration):
-        """
-        Raises the piston if it is not already on the top. Once the piston reached the top, as 
-        identified by the endstop sensor, returns True indicating that the movement happened as 
-        desired. If there was a timeout, stops the movement and returns False. The timeout might be
-        because something stopped the piston from moving or it may be the desired duration of the 
-        movement, which stops before reaching the endstop.
-        """
-        if GPIO.input(self.pin_sensor_up) == True:
-            # The piston is already at the highest position.
-            return 'top'
-        GPIO.output(self.pin_down, 0)  # Guarantees the piston is not going down
-        GPIO.output(self.pin_up, 1)  # Makes the piston go up
-        # The timeout must be an int in ms
-        ms_duration = int(round(1000 * duration, 0))
-        if ms_duration < 1:  # This value must be always greater than zero
-            print(f"Timeout Error, less than 1 ms: {ms_duration}")
-            ms_duration = 1
-        up = GPIO.wait_for_edge(self.pin_sensor_up, GPIO.RISING, timeout=ms_duration)
-        GPIO.output(self.pin_up, 0) 
-        if up is None: # Timeout occurred
-            return None
-        return 'top'
+    # def piston_up(self, duration):
+    #     """
+    #     Raises the piston if it is not already on the top. Once the piston reached the top, as 
+    #     identified by the endstop sensor, returns True indicating that the movement happened as 
+    #     desired. If there was a timeout, stops the movement and returns False. The timeout might be
+    #     because something stopped the piston from moving or it may be the desired duration of the 
+    #     movement, which stops before reaching the endstop.
+    #     """
+    #     if GPIO.input(self.pin_sensor_up) == True:
+    #         # The piston is already at the highest position.
+    #         return 'top'
+    #     GPIO.output(self.pin_down, 0)  # Guarantees the piston is not going down
+    #     GPIO.output(self.pin_up, 1)  # Makes the piston go up
+    #     # The timeout must be an int in ms
+    #     ms_duration = int(round(1000 * duration, 0))
+    #     if ms_duration < 1:  # This value must be always greater than zero
+    #         print(f"Timeout Error, less than 1 ms: {ms_duration}")
+    #         ms_duration = 1
+    #     up = GPIO.wait_for_edge(self.pin_sensor_up, GPIO.RISING, timeout=ms_duration)
+    #     GPIO.output(self.pin_up, 0) 
+    #     if up is None: # Timeout occurred
+    #         return None
+    #     return 'top'
 
     def emergency(self):
         """
         Moves the piston up in an emergency
         """
-         # Send the piston up
-         GPIO.output(self.pin_up, 1)
-         GPIO.output(self.pin_down, 0)
-         # After 10 seconds, turn off the up output
-         QtCore.QTimer.singleShot(10000, lambda: GPIO.output(self.pin_up, 0))
+        # Send the piston up
+        GPIO.output(self.pin_up, 1)
+        GPIO.output(self.pin_down, 0)
+        # After 10 seconds, turn off the up output
+        QtCore.QTimer.singleShot(10000, lambda: GPIO.output(self.pin_up, 0))
 
     def stop(self):
         """
