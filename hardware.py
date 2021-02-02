@@ -318,7 +318,8 @@ class pneumatic_piston():
         GPIO.output(self.pin_up, 1)
         GPIO.output(self.pin_down, 0)
         # After 10 seconds, turn off the up output
-        QtCore.QTimer.singleShot(10000, lambda: GPIO.output(self.pin_up, 0))
+        time.sleep(10)
+        GPIO.output(self.pin_up, 0)
 
     def stop(self):
         """
