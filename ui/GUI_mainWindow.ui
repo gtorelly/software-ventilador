@@ -4440,7 +4440,7 @@
            </layout>
           </item>
           <item row="1" column="0">
-           <widget class="QPushButton" name="VCV_stop_btn">
+           <widget class="QPushButton" name="stop_btn">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
               <horstretch>0</horstretch>
@@ -4469,6 +4469,19 @@
             </property>
             <property name="text">
              <string>Parar</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="emerg_btn">
+            <property name="minimumSize">
+             <size>
+              <width>250</width>
+              <height>50</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Emergência</string>
             </property>
            </widget>
           </item>
