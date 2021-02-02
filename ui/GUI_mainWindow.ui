@@ -336,7 +336,7 @@
                </layout>
               </item>
               <item row="1" column="0">
-               <widget class="QLabel" name="VCV_volume_min_lbl">
+               <widget class="QLabel" name="VCV_volume_lbl">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -369,7 +369,7 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QPushButton" name="VCV_volume_min_minus_btn">
+                 <widget class="QPushButton" name="VCV_volume_minus_btn">
                   <property name="minimumSize">
                    <size>
                     <width>50</width>
@@ -398,7 +398,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QDoubleSpinBox" name="VCV_volume_min_spb">
+                 <widget class="QDoubleSpinBox" name="VCV_volume_spb">
                   <property name="minimumSize">
                    <size>
                     <width>200</width>
@@ -435,7 +435,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="VCV_volume_min_plus_btn">
+                 <widget class="QPushButton" name="VCV_volume_plus_btn">
                   <property name="minimumSize">
                    <size>
                     <width>50</width>
@@ -4293,7 +4293,7 @@
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QPushButton" name="VCV_inhale_pause_btn">
+           <widget class="QPushButton" name="inhale_pause_btn">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -4325,7 +4325,7 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="QPushButton" name="VCV_inhale_pause_minus_btn">
+             <widget class="QPushButton" name="inhale_pause_minus_btn">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                 <horstretch>1</horstretch>
@@ -4360,7 +4360,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QDoubleSpinBox" name="VCV_inhale_pause_spb">
+             <widget class="QDoubleSpinBox" name="inhale_pause_spb">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>1</horstretch>
@@ -4403,7 +4403,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="VCV_inhale_pause_plus_btn">
+             <widget class="QPushButton" name="inhale_pause_plus_btn">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                 <horstretch>1</horstretch>
@@ -4485,6 +4485,32 @@
             </property>
            </widget>
           </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="peep_lbl">
+            <property name="minimumSize">
+             <size>
+              <width>250</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>PEEP</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QLabel" name="peep_val">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -4497,8 +4523,8 @@
  <tabstops>
   <tabstop>VCV_frequency_plus_btn</tabstop>
   <tabstop>VCV_pressure_max_plus_btn</tabstop>
-  <tabstop>VCV_volume_min_plus_btn</tabstop>
-  <tabstop>VCV_inhale_pause_plus_btn</tabstop>
+  <tabstop>VCV_volume_plus_btn</tabstop>
+  <tabstop>inhale_pause_plus_btn</tabstop>
   <tabstop>VCV_frequency_minus_btn</tabstop>
   <tabstop>VCV_pressure_max_minus_btn</tabstop>
   <tabstop>PCV_volume_max_minus_btn</tabstop>
@@ -4525,13 +4551,13 @@
   <tabstop>al_PEEP_ok_btn</tabstop>
   <tabstop>al_frequency_ok_btn</tabstop>
   <tabstop>al_apnea_ok_btn</tabstop>
-  <tabstop>VCV_inhale_pause_minus_btn</tabstop>
+  <tabstop>inhale_pause_minus_btn</tabstop>
   <tabstop>tabWidget</tabstop>
   <tabstop>VCV_frequency_spb</tabstop>
   <tabstop>VCV_pressure_max_spb</tabstop>
-  <tabstop>VCV_volume_min_minus_btn</tabstop>
-  <tabstop>VCV_volume_min_spb</tabstop>
-  <tabstop>VCV_inhale_pause_spb</tabstop>
+  <tabstop>VCV_volume_minus_btn</tabstop>
+  <tabstop>VCV_volume_spb</tabstop>
+  <tabstop>inhale_pause_spb</tabstop>
   <tabstop>PCV_frequency_spb</tabstop>
   <tabstop>PCV_pressure_spb</tabstop>
   <tabstop>PCV_volume_max_spb</tabstop>
