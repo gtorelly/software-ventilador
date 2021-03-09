@@ -10,7 +10,7 @@ from queue import Queue, LifoQueue
 from scipy import integrate
 import sys
 import time
-from hardware import pressure_gauge, pneumatic_piston, buttons, buzzer, led
+from hardware import pressure_gauge, pneumatic_piston, buttons, buzzer, led, bme
 
 class ReadSensors(QtCore.QObject):
     """
@@ -373,7 +373,6 @@ class ControlPiston(QtCore.QObject):
             self.signal_cycle_data.emit(self.cd)
 
             time.sleep(0.05)
-                    
 
 class InterfaceControl(QtCore.QObject):
     """
@@ -575,6 +574,12 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
         self.data_timer.start(data_update_period)
         self.data_timer.timeout.connect(self.process_data)
 
+        # Creates a timer to read the ambient temperature, pressure and humidity periodically
+        # self.gme_timer = QtCore.QTimer()
+        # gme_update_period = 500  # period in ms
+        # self.gme_timer.start(gme_update_period)
+        # self.gme_timer.timeout.connect(self.get_bme)
+
     def connect_buttons(self):
         # Buttons
         # VCV tab
@@ -698,7 +703,6 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
             lambda: self.change_value(self.inhale_pause_spb, "-"))
         self.inhale_pause_btn.clicked.connect(self.inhale_pause_control)
         
-
     def create_data_structures(self):
         """
         Creates the arrays and queues that will be used to control the piston and update the graphs
@@ -785,6 +789,9 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
         volume = -integrate.trapz(self.flw_data[1, i_li], self.flw_data[0, i_li])
         # Converting the volume from L to mL and time from minute to second
         volume = 1000 * volume / 60
+        # Calibration factor
+        calib = 5
+        volume = volume * calib
         self.vol_lifo_q.put([t, volume])
         self.vol_data = np.roll(self.vol_data, 1)
         self.vol_data[:, 0] = (t, volume)
@@ -1290,6 +1297,10 @@ class DesignerMainWindow(QtWidgets.QMainWindow):
         self.peak_pressure_val.setText(f"{self.cd['peak_pressure']:.2f} cmH2O")
         self.tidal_volume_val.setText(f"{self.cd['tidal_volume']:.0f} ml")
         self.tidal_volume_val.setText(f"{self.cd['tidal_volume']:.0f} ml")
+
+    # def get_bme(self):
+    #     sensor = bme()
+    #     sensor.get_current()
 
 class AboutWindow(QtWidgets.QMainWindow):
     """Customization for Qt Designer created window"""

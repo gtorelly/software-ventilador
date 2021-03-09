@@ -6,6 +6,8 @@ import Adafruit_ADS1x15
 import numpy as np
 from PyQt5 import QtCore
 import RPi._GPIO as GPIO
+import bme280 as BME
+import smbus2
 import time
 
 class pressure_gauge():
@@ -60,6 +62,9 @@ class pressure_gauge():
         self.flw_volt_max = self.gains[self.flw_gain]
         self.flw_volt_offset = 0.0274
 
+        # Creating the instance of the temperature, pressure ad humidity sensor, to get air density
+        self.bme_sensor = bme()
+
     def read_volts(self, ch, gain, adc_max, volt_max, mode):
         """
         Generic function to get voltage read by the adc, withou any kind of offset compensation
@@ -111,10 +116,10 @@ class pressure_gauge():
         A_1 = np.pi * (D_1 / 2) * (D_1 / 2)
         A_2 = np.pi * (D_2 / 2) * (D_2 / 2)
         C_D = A_2 / A_1  # Area ratio
-        d = D_2 / D_1  # Diameter ration
+        d = D_2 / D_1  # Diameter ratio
         # The air density must be calculated taking into account the air temperature and humidity,
         # therefore it is necessary to buy another sensor for this application.
-        rho = 1.2
+        rho = self.bme_sensor.get_air_density()
 
         # q is the flow in m³/s
         q = C_D * (np.pi / 4.0) * (D_2 ** 2.0) * (2.0 * delta_p * flow_dir /
@@ -357,3 +362,51 @@ class pneumatic_piston():
         else:
             self.piston_at_bottom = False
             self.piston_at_top = True
+
+class bme():
+    def __init__(self):
+        super().__init__()
+        self.port = 1
+        self.address = 0x76
+        self.bus = smbus2.SMBus(self.port)
+
+        self.calibration_params = BME.load_calibration_params(self.bus, self.address)
+
+    def get_air_density(self):
+        # the sample method will take a single reading and return a
+        # compensated_reading object
+        data = BME.sample(self.bus, self.address, self.calibration_params)
+
+        # the compensated_reading class has the following attributes
+        # print(data.id)
+        # print(data.timestamp)
+        # print(f"T: {data.temperature:.2f} °C")
+        # print(f"P: {data.pressure:.2f} mbar")
+        # print(f"H: {data.humidity:.2f} %")
+
+        # The equation used to calculate the density of air was taken from wikipedia's article,
+        # and it is from https://wahiduddin.net/calc/density_altitude.htm - An Introduction fo Air 
+        # Density and Density Altitude Calculations by Richard Shelquist, 2019
+        # Calculation of the air density based on T, P and H
+        T = data.temperature + 273.15  # Temperature in Kelvin
+        P = data.pressure * 100  # Pressure in Pa
+        R = 8.31446  # Universal gas constant in J/(K.Mol)
+        M_d = 0.0289652  # Molar mass of dry air in Kg/Mol
+        M_v = 0.018016  # Molar mass of water vapor in Kg/Mol
+
+        # Saturation vapor pressure of water (Tetens' equation) (uses temperatures in C!)
+        P_sat = 610.78 * 10 ** (7.5 * data.temperature / (data.temperature + 237.3))  # in Pa
+        phi = data.humidity / 100  # Relative umidity varying from 0-1
+        P_v = phi * P_sat  # Vapor pressure of water in Pa
+        P_d = P - P_v  # partial pressure of dry air in Pa
+
+        # print(f"P_sat: {P_sat} Pa")
+        # print(f"phi: {phi}")
+        # print(f"P_v: {P_v} Pa")
+        # print(f"P_d: {P_d} Pa")
+
+        air_density = (P_d * M_d + P_v * M_v) / (R * T)
+        # print(f"Density of humid air: {air_density:.4f} Kg/m³\n")
+        # there is a handy string representation too
+        # print(data)
+        return(air_density)
