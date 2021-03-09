@@ -135,6 +135,7 @@ class pressure_gauge():
         to obtain a more accurate measurement. Can also be called at other times when the ventilator
         is not operating.
         These values are offset voltages read by the adc.
+        This function needs to be called in a clever way to avoid accumulation of errors.
         """
         prs_volts = []
         flw_volts = []
