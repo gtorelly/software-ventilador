@@ -157,16 +157,16 @@ class buttons():
         # Creating the local reference to input_q
         self.input_q = input_q
         # Configuring the board's parameters
-        # Physical pin number on the header (not GPIOxx)
-        GPIO.setmode(GPIO.BOARD)
+        # Pin numbers as defined by BCM, not the physical location on the board
+        GPIO.setmode(GPIO.BCM)
         # Pins of the buttons
-        self.ok_pin = 33
-        self.up_pin = 35
-        self.down_pin = 37
+        self.ok_pin = 11
+        self.up_pin = 9
+        self.down_pin = 10
         # Pins of the rotary switch
-        self.rot_btn_pin = 19
-        self.rot_dt_pin = 21
-        self.rot_clk_pin = 23
+        self.rot_btn_pin = 17
+        self.rot_dt_pin = 27
+        self.rot_clk_pin = 0
 
         # Buttons should be pulled up
         GPIO.setup(self.ok_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -204,10 +204,10 @@ class buzzer():
     def __init__(self):
         super().__init__()
         # Configuring the board's parameters
-        # Physical pin number on the header (not GPIOxx)
-        GPIO.setmode(GPIO.BOARD)
+        # Pin numbers as defined by BCM, not the physical location on the board
+        GPIO.setmode(GPIO.BCM)
         # Buzzer pin
-        self.buz_pin = 40
+        self.buz_pin = 4
 
         # Buttons should be pulled up
         GPIO.setup(self.buz_pin, GPIO.OUT)
@@ -222,10 +222,10 @@ class led():
     def __init__(self):
         super().__init__()
         # Configuring the board's parameters
-        # Physical pin number on the header (not GPIOxx)
-        GPIO.setmode(GPIO.BOARD)
+        # Pin numbers as defined by BCM, not the physical location on the board
+        GPIO.setmode(GPIO.BCM)
         # LED pin
-        self.led_pin = 7
+        self.led_pin = 12
 
         GPIO.setup(self.led_pin, GPIO.OUT)
         # start turned off, it's logic is reversed
@@ -237,15 +237,15 @@ class led():
         
 class pneumatic_piston():
     def __init__(self, parent=None):
-        # Definition of the pins (physical numbering on board, not GPIOXX)
-        self.pin_down = 16
-        self.pin_up = 18
-        self.pin_sensor_down = 38
-        self.pin_sensor_up = 36
+        # Pin numbers as defined by BCM, not the physical location on the board
+        GPIO.setmode(GPIO.BCM)
+        self.pin_down = 6
+        self.pin_up = 5
+        self.pin_sensor_down = 19
+        self.pin_sensor_up = 26
         
         # Assigning pin numbers and setting them to zero
         GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BOARD)  # defines pin numbers as physical numbering on board, not GPIOXX
         GPIO.setup(self.pin_down, GPIO.OUT) 
         GPIO.setup(self.pin_up, GPIO.OUT)
         GPIO.setup(self.pin_sensor_down, GPIO.IN, pull_up_down=GPIO.PUD_UP) 
